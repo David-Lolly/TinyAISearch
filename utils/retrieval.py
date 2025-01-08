@@ -118,7 +118,7 @@ class Similarity():
                 max_attempts = 2
                 for attempt in range(self.max_attempts):
                     try:
-                        response = requests.request("POST", url, json=payload, headers=headers, timeout=10)
+                        response = requests.request("POST", url, json=payload, headers=headers, timeout=3)
 
                         # 检查嵌入请求是否成功
                         if response.status_code == 200:
@@ -128,19 +128,19 @@ class Similarity():
                             })
                             break  # 成功后退出重试循环
                         else:
-                            logger.error(f"文档嵌入失败，尝试 {attempt + 1}: 状态码 {response.status_code}")
+                            logger.error(f"文档嵌入失败，第{doc_index+1}个文档尝试 {attempt + 1}: 状态码 {response.status_code}")
 
                             # 最后一次尝试失败
                             if attempt == max_attempts - 1:
-                                logger.error(f"经过 {max_attempts} 次尝试，文档嵌入仍然失败",exc_info=True)
+                                logger.error(f"第{doc_index+1}个文档经过 {max_attempts} 次尝试，文档嵌入仍然失败",exc_info=True)
                                 break
 
                     except requests.RequestException as e:
-                        logger.error(f"请求异常，尝试 {attempt + 1}: {e}")
+                        logger.error(f"请求异常，第{doc_index+1}个文档尝试 {attempt + 1}: {e}")
 
                         # 最后一次尝试失败
                         if attempt == max_attempts - 1:
-                            logger.error(f"经过 {max_attempts} 次尝试，文档嵌入仍然失败")
+                            logger.error(f"第{doc_index+1}个文档经过 {max_attempts} 次尝试，文档嵌入仍然失败")
                             break
 
                 # 更新进度条
