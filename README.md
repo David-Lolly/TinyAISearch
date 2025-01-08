@@ -31,10 +31,14 @@ cd TinyAISearch
 2. 安装依赖
 ```sh
 conda create -n TinyAISearch python=3.10
-pip install -r requirements.txt
-conda install faiss # 使用pip安装faiss存在一点问题，这里使用conda来安装
-crawl4ai-setup # 完成crawl4ai包的后续初始化步骤
-crawl4ai-doctor # 验证是否安装成功
+conda activate TinyAISearch 
+pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host=mirrors.aliyun.com
+# 使用pip安装faiss存在一点问题，这里使用conda来安装
+conda install faiss 
+# 完成crawl4ai包的后续初始化步骤
+crawl4ai-setup 
+# 验证是否安装成功
+crawl4ai-doctor 
 ```
 
 ---
@@ -102,7 +106,7 @@ crawl4ai-doctor # 验证是否安装成功
     "description": "name可以在baidu、google和serper三者之间选择。baidu使用python库，不需要管api_key和cse，可以直接使用；google需要填写对应的api_key和cse；serper只需要填写对应的api_key，不用管cse。google和serper的搜索结果优于baidu"  
   },  
   "debug": {  
-    "value": false,  
+    "value": true,  
     "description": "debug是用来调试代码，当你遇到代码报错或者想要修改代码时建议将value设置为true，然后运行search.py，这样你就可以在IDE中对代码进行调试，当你调试好代码想到前端看效果时，将value设置为false"  
   }  
 }
@@ -121,9 +125,10 @@ python AISearch.py
 ```
 
 
-  3. 🔥测试没有问题后继续运行下面命令
+  3. 🔥测试没有问题后将配置文件中的debug设置为false，继续运行下面命令
 ```sh
 python AISearch_api.py
+# 在新的命令窗口输入以下命令
 streamlit run app.py
 ```
 
