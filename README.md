@@ -17,7 +17,7 @@ TinyAISearch实现了搜索关键词重写、网页爬取、网页内容召回�
 ###### 🔧开发前的配置要求
 
 1. 安装Anaconda或者Miniconda
-2. Python=3.10
+2. 虚拟环境Python=3.10
 
 ###### 🛠️安装步骤
 
@@ -42,9 +42,9 @@ crawl4ai-doctor # 验证是否安装成功
 
 
 ### 🚀快速上手
-1. 📝填写配置文件config.json，支持所有OpenAI接口的大模型(Qwen、GLM、DeepSeek....），我使用的Embedding和Rerank模型是[硅基流动](https://siliconflow.cn/zh-cn/models) 的模型（free🤩），示例：
+1. 📝填写配置文件config.json，支持所有OpenAI接口的大模型(Qwen、GLM、DeepSeek....），我使用的Embedding和Rerank模型是[硅基流动](https://cloud.siliconflow.cn/account/ak) 的模型（free🤩），示例：
 
-  下面以DeepSeek的大模型为例，你只需要将在[DeepSeek](https://platform.deepseek.com/api_keys)申请到的api key和base url填到对应位置，将在[硅基流动](https://siliconflow.cn/zh-cn/models)申请到的api key填写到cloud_embedding和cloud_rerank对应位置即可。
+  下面以DeepSeek的大模型为例，你只需要将在[DeepSeek](https://platform.deepseek.com/api_keys)申请到的api key填到对应位置，将在[硅基流动](https://cloud.siliconflow.cn/account/ak)申请到的api key填写到cloud_embedding和cloud_rerank对应位置即可。
 ```json
 {  
   "local_embedding_model": false,  
@@ -115,7 +115,7 @@ crawl4ai-doctor # 验证是否安装成功
 - 其他的说明请阅读config文件中的description
 
 
-2. 💡配置文件写好之后，测试能否正常运行
+1. 💡配置文件写好之后，测试能否正常运行
 ```sh
 python AISearch.py
 ```

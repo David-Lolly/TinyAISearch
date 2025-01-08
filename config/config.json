@@ -1,60 +1,60 @@
-{
-  "local_embedding_model": false,
-  "local_rerank_model": false,
+{  
+  "local_embedding_model": false,  
+  "local_rerank_model": false,  
   "LLM": {
-    "model_name": "deepseek-chat",
-    "base_url": "https://api.deepseek.com/v1",
-    "api_key": "sk-8e57db810c84444ea50e4166b7e33ee1",
+    "model_name": "deepseek-chat",  
+    "base_url": "https://api.deepseek.com/v1",  
+    "api_key": "sk-xxxxx",  
     "description":"model_name填写大模型名称，base_url填写该模型厂商的base_url,api_key填写你创建的api key"
-  },
-  "embedding_model": {
-    "local_embedding": {
-      "model_path": "D:\\English_Path\\model\\huggingface_model\\BAAI\\bge_large_zh",
-      "description":"默认使用云端embedding模型，若local_embedding_model为true，则使用本地embedding模型。model_path填写本地embedding模型路径"
-    },
-    "cloud_embedding": {
-      "model_name": "BAAI/bge-large-zh-v1.5",
-      "base_url": "https://api.siliconflow.cn/v1/embeddings",
-      "api_key": "sk-gkjqhyewefoqsyjkczpwemxtypfvokmbhajaduwlkauvsvxd",
-      "description":"model_name填写embedding模型名称，base_url填写该模型厂商的base_url,api_key填写你创建的api key"
-    }
-  },
-  "rerank_model": {
-    "local_rerank": {
-      "model_path": "D:\\English_Path\\model\\huggingface_model\\Rerank",
-      "description":"默认使用云端rerank模型，若local_rerank_model为true，则使用本地rerank模型。model_path填写本地rerank模型路径"
-    },
-    "cloud_rerank": {
-      "model_name": "BAAI/bge-reranker-v2-m3",
-      "base_url": "https://api.siliconflow.cn/v1/rerank",
-      "api_key": "sk-gkjqhyewefoqsyjkczpwemxtypfvokmbhajaduwlkauvsvxd",
-      "description":"model_name填写rerank模型名称，base_url填写该模型厂商的base_url,api_key填写你创建的api key"
-    }
-  },
-  "retrieval": {
-    "quality": "higher",
-    "method": {
-      "similarity": {
-        "activate": true,
-        "top_k": 10,
-        "description": "使用similarity+rerank的方法进行召回，activate的值为true表示使用该方法，top_k控制召回文本数量"
-      },
-      "rank": {
-        "activate": false,
-        "top_k": 10,
-        "description": "使用rank+BM25的方法进行召回，activate的值为true表示使用该方法，top_k控制召回文本数量"
-      }
-    },
-    "description":"quality表示召回的质量，可以在high、higher之间选。high召回质量一般，速度更快；higher召回质量更高，速度稍慢。两种召回方法分别是相似度召回(similarity)和重排序召回(rank),通过activate的值来选择使用哪种方法。top_k控制召回文本数量"
-  },
-  "search_engine": {
-    "name": "baidu",
-    "api_key": "AIzaSyAFqqMEQPcjyP0fmZhUh6HWrJG5oZ2x7bI",
-    "cse": "b25cbdf4436e64319",
-    "description": "name可以在baidu、google和serper三者之间选择。baidu使用python库，不需要管api_key和cse，可以直接使用；google需要填写对应的api_key和cse；serper只需要填写对应的api_key，不用管cse。google和serper的搜索结果优于baidu"
-  },
-  "debug": {
-    "value": true,
-    "description": "debug是用来调试代码，当你遇到代码报错或者想要修改代码时建议将value设置为true，然后运行search.py，这样你就可以在IDE中对代码进行调试，当你调试好代码想到前端看效果时，将value设置为false"
-  }
+  },  
+  "embedding_model": {  
+    "local_embedding": {  
+      "model_path": "D:\\model\\huggingface_model\\BAAI\\bge_large_zh",  
+      "description":"默认使用云端embedding模型，路径可以不填，若local_embedding_model为true，表示使用本地embedding模型。model_path填写本地embedding模型路径"  
+    },  
+    "cloud_embedding": {  
+      "model_name": "BAAI/bge-large-zh-v1.5",  
+      "base_url": "https://api.siliconflow.cn/v1/embeddings",  
+      "api_key": "sk-xxxxxx",  
+      "description":"model_name填写embedding模型名称，base_url填写该模型厂商的base_url,api_key填写你创建的api key"  
+    }  
+  },  
+  "rerank_model": {  
+    "local_rerank": {  
+      "model_path": "D:\\model\\huggingface_model\\Rerank",  
+      "description":"默认使用云端rerank模型，路径可以不填，若local_rerank_model为true，表示使用本地rerank模型。model_path填写本地rerank模型路径"  
+    },  
+    "cloud_rerank": {  
+      "model_name": "BAAI/bge-reranker-v2-m3",  
+      "base_url": "https://api.siliconflow.cn/v1/rerank",  
+      "api_key": "sk-xxxxxx",  
+      "description":"model_name填写rerank模型名称，base_url填写该模型厂商的base_url,api_key填写你创建的api key"  
+    }  
+  },  
+  "retrieval": {  
+    "quality": "high",  
+    "method": {  
+      "similarity": {  
+        "activate": true,  
+        "top_k": 10,  
+        "description": "使用similarity+rerank的方法进行召回，activate的值为true表示使用该方法，top_k控制召回文本数量"  
+      },  
+      "rank": {  
+        "activate": false,  
+        "top_k": 10,  
+        "description": "使用rank+BM25的方法进行召回，activate的值为true表示使用该方法，只能选择一种召回方法，top_k控制召回文本数量"  
+      }  
+    },  
+    "description":"quality表示召回的质量，可以在high、higher之间选。high召回质量一般，速度更快；higher召回质量更高，速度稍慢。两种召回方法分别是相似度召回(similarity)和重排序召回(rank),通过activate的值来选择使用哪种方法。top_k控制召回文本数量"  
+  },  
+  "search_engine": {  
+    "name": "baidu",  
+    "api_key": "",  
+    "cse": "",  
+    "description": "name可以在baidu、google和serper三者之间选择。baidu使用python库，不需要管api_key和cse，可以直接使用；google需要填写对应的api_key和cse；serper只需要填写对应的api_key，不用管cse。google和serper的搜索结果优于baidu"  
+  },  
+  "debug": {  
+    "value": false,  
+    "description": "debug是用来调试代码，当你遇到代码报错或者想要修改代码时建议将value设置为true，然后运行search.py，这样你就可以在IDE中对代码进行调试，当你调试好代码想到前端看效果时，将value设置为false"  
+  }  
 }
