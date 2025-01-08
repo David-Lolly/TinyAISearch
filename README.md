@@ -6,7 +6,6 @@ TinyAISearch实现了搜索关键词重写、网页爬取、网页内容召回�
 
 对话示例：
 
-[//]: # (![示例]&#40;./images/example.png=600x600&#41;)
 <img src="./images/img.png"  width="600" />
 
  
@@ -45,7 +44,7 @@ crawl4ai-doctor # 验证是否安装成功
 ### 🚀快速上手
 1. 📝填写配置文件config.json，支持所有OpenAI接口的大模型(Qwen、GLM、DeepSeek....），我使用的Embedding和Rerank模型是[硅基流动](https://siliconflow.cn/zh-cn/models) 的模型（free🤩），示例：
 
-首次尝试你只需要将在[DeepSeek](https://platform.deepseek.com/api_keys)（其他厂商也可以）申请到的大模型厂家的api key和base url填到对应位置，将在[硅基流动](https://siliconflow.cn/zh-cn/models)申请到的api key填写到cloud_embedding和cloud_rerank对应位置即可。
+  下面以DeepSeek的大模型为例，你只需要将在[DeepSeek](https://platform.deepseek.com/api_keys)申请到的api key和base url填到对应位置，将在[硅基流动](https://siliconflow.cn/zh-cn/models)申请到的api key填写到cloud_embedding和cloud_rerank对应位置即可。
 ```json
 {  
   "local_embedding_model": false,  
@@ -146,18 +145,17 @@ higher召回说明：
 文件结构:
 
 ```
-│  app.py  # 前端展示
+│  app.py  # 前端对话页面
 │  LICENSE.txt
 │  README.md
 │  requirements.txt
-│  search.py # 本地调试代码
+│  search.py # 本地调试代码，测试代码是否能正常运行
 │  search_api.py # AI搜索接口，为前端提供服务
 │
 ├─config
 │      config.json # 配置文件   
 │
 ├─images
-│      example.png
 │      img.png
 │      multi_query_retrieval.png
 │      success.png
