@@ -144,7 +144,6 @@ streamlit run app.py
 
 higher召回说明：
 
-[//]: # (![多问题召回]&#40;./images/multi_query_retrieval.png&#41;)
 <img src="./images/multi_query_retrieval.png"  width="900" />
 
 文件结构:

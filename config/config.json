@@ -54,7 +54,7 @@
     "description": "name可以在baidu、google和serper三者之间选择。baidu使用python库，不需要管api_key和cse，可以直接使用；google需要填写对应的api_key和cse；serper只需要填写对应的api_key，不用管cse。google和serper的搜索结果优于baidu"  
   },  
   "debug": {  
-    "value": false,  
+    "value": true,  
     "description": "debug是用来调试代码，当你遇到代码报错或者想要修改代码时建议将value设置为true，然后运行search.py，这样你就可以在IDE中对代码进行调试，当你调试好代码想到前端看效果时，将value设置为false"  
   }  
 }

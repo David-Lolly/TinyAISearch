@@ -111,8 +111,8 @@ def search_generate(query: str, search_results: List[Document]):
     search_content = [{"搜索结果": doc.page_content, "标题": doc.metadata['title']} for doc in search_results]
     # 将搜索结果的标题和链接提取出来，作为参考信息
     content_info = [{doc.metadata['title']:doc.metadata['url'] for doc in search_results}]
-    print(f'content_info:{content_info}')
-    print(f'search results:{search_content}')
+    # print(f'content_info:{content_info}')
+    # print(f'search results:{search_content}')
 
     # 系统提示词
     prompt = """你是一个专业的AI助手，专注于根据搜索结果提供高质量、精准的信息回复。

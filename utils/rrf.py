@@ -203,6 +203,9 @@ class Retrieval:
         # 将文档分块
         split_docs = split_doc_direct(docs)
 
+        if len(split_docs) >150:
+            split_docs = split_docs[:150]
+        
         # 根据配置执行检索方法
         if self.similarity_method:
             top_k = self.config['retrieval']['method']['similarity']['top_k']

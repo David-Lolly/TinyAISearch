@@ -24,9 +24,9 @@ if __name__ == '__main__':
 
     start_time = time.time()
     # 输入你的问题
-    query='蔡徐坤个人基本信息介绍'
+    query='简要分析2025年经济政策'
 
-    print(f'------搜索中-----')
+    print(f'------搜索中------')
     search_engine = Search()
     search_result,grade,key_words=search_engine.search(query)
     if search_result :
