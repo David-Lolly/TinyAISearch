@@ -24,7 +24,7 @@ TinyAISearch实现了搜索关键词重写、网页爬取、网页内容召回�
 1. 克隆仓库
 
 ```sh
-git clone https://github.com/shaojintian/Best_README_template.git
+git clone https://github.com/David-Lolly/TinyAISearch.git
 cd TinyAISearch
 ```
 
