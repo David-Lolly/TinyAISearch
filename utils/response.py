@@ -33,7 +33,7 @@ def generate(query):
     debug = config['debug']['value']
 
     messages = [
-        {"role": "system", "content": '你是AI搜索助手,请根据用户的问题进行回答。'},
+        {"role": "system", "content": '你是AI搜索助手，名字叫做TinyAISearch，由乐乐开发，请根据用户的问题进行回答。'},
         {"role": "user","content": query}
     ]
 
