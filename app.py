@@ -389,7 +389,7 @@ def search_llm(query):
                         print(f'item:{item}')
                         for title, url in item.items():
                             reference_html += f'<li><a href="{url}" target="_blank">{title}</a></li>'
-                    reference_html += "</ul>"
+                    reference_html += "</ul><br>"
 
                 message_placeholder.markdown(
                     f"""
@@ -397,17 +397,15 @@ def search_llm(query):
                         <span class="timestamp">{timestamp}</span>
                         <div class="status-label">完成</div>
                     </div>
-                    {full_response}
-                    <br>
+                    {full_response+'<br>'}
                     {reference_html}
-                    <br>
                     """,
                     unsafe_allow_html=True
                 )
                 print(full_response)
                 st.session_state.messages.append({
                     "role": "assistant",
-                    "content": full_response+ '\n\n'+ reference_html,
+                    "content": full_response+'<br>'+reference_html,
                     "timestamp": timestamp
                 })
     except Exception as e:
@@ -435,13 +433,7 @@ def search_web():
             if message['role'] == 'user':
                 with st.chat_message(message["role"]):
                     st.markdown(
-                        f"""
-                        <div class=input-metadata>
-                            <span >{message['content']}</span>
-                            <span class="timestamp">{timestamp}</span>
-                        </div>
-                        <br>
-                        """, unsafe_allow_html=True
+                        message['content'],
                     )
             else:
                 with st.chat_message(message["role"]):
@@ -451,7 +443,6 @@ def search_web():
                             <span class="timestamp">{timestamp}</span>
                         </div>
                         {message['content']}
-                        <br>
                         """,
                         unsafe_allow_html=True
                     )
@@ -479,13 +470,7 @@ def search_web():
     if submitted and user_input:
         with st.chat_message('user'):
             st.markdown(
-                f"""
-                <div class=input-metadata>
-                        <span >{user_input}</span>
-                        <span class="timestamp">{datetime.now().strftime("%H:%M")}</span>
-                </div>
-                <br>
-                """,unsafe_allow_html=True
+                user_input,
             )
 
         search_llm(user_input)
