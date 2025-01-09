@@ -35,8 +35,8 @@ cd TinyAISearch
 conda create -n TinyAISearch python=3.10
 conda activate TinyAISearch 
 pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host=mirrors.aliyun.com
-# 使用pip安装faiss存在一点问题，这里使用conda来安装
-conda install faiss 
+# 使用pip安装faiss存在一点问题，这里使用conda来安装，对于有GPU的朋友可以下载gpu版本conda install -c pytorch faiss-gpu
+conda install -c pytorch faiss-cpu 
 # 完成crawl4ai包的后续初始化步骤
 crawl4ai-setup 
 # 验证是否安装成功
