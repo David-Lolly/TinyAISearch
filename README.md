@@ -2,6 +2,8 @@
 
 # 🔍 TinyAISearch ✨
 
+<img src="./images/ChatMessage.png"  width="100%" />
+
 [ 简体中文 | [English](README_EN.md) ]
 
 ---
