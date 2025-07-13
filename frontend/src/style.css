@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 重置默认样式，确保全屏显示 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 
+  Global styles to ensure consistent layout.
+  Removing overflow: hidden to allow scrolling on long pages like the config view.
+*/
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #f3f4f6; /* A common background color */
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #ffffff;
+}
+
+/* Vue 应用根容器样式 */
+#app {
+  width: 100%; /* 使用100%，避免因100vw导致的滚动条抖动 */
+  min-height: 100vh; /* 占满视口高度，但允许内容超过后滚动 */
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  display: block; /* 让其表现得像普通块级元素 */
+  overflow-x: hidden; /* 横向隐藏 */
+  overflow-y: auto;  /* 允许纵向滚动 */
+}
+
+/* 美化滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db; /* gray-400 */
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af; /* gray-500 */
+}
+::-webkit-scrollbar-track {
+  background: #f3f4f6; /* gray-100 */
+}
+
+/* 确保所有全屏容器都正确显示 */
+.full-screen-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 聊天视图容器 */
+.chat-view-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 主聊天区域 */
+.main-chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 消息列表区域 */
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* 输入区域 */
+.input-area {
+  flex-shrink: 0;
+  border-top: 1px solid #e5e7eb;
+  background-color: #ffffff;
+}
+
+/* 性能优化 - 启用GPU加速 */
+button, 
+a, 
+.transition-all,
+.transform,
+.hover\:scale-\[1\.01\]:hover,
+.hover\:scale-\[1\.02\]:hover {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* 减少按钮延迟 */
+button, 
+a {
+  touch-action: manipulation;
+}
+
+/* 移除按钮默认轮廓，统一样式 */
+button:focus,
+a:focus,
+input:focus {
+  outline: none;
+}
+
+/* 优化输入框聚焦样式，使用更精致的样式替代默认轮廓 */
+.login-card input:focus {
+  box-shadow: 0 0 0 2px rgba(201, 100, 66, 0.15);
+}
+
+/* 优化淡入淡出动画 */
+.fade-enter-active,
+.fade-leave-active {
+  will-change: opacity, transform;
+}
+
+/* 使点击区域更大，改善移动设备体验 */
+.login-card button,
+.login-card a {
+  position: relative;
+}
+
+.login-card button::after,
+.login-card a::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  bottom: -8px;
+  left: -8px;
+  z-index: -1;
+}
