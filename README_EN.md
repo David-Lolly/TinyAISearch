@@ -4,9 +4,9 @@
 
 ---
 
-**TinyAISearch** is a lightweight AI search project that covers the complete process of search keyword rewriting, web page crawling, content retrieval, and streaming response display.
+**TinyAISearch** is a lightweight AI search project that implements the complete RAG process, from **search query analysis** and **web page crawling** to **content retrieval** and **streaming responses**.
 
-The RAG module integrates various retrieval strategies (such as similarity search, BM25, and multi-path retrieval), allowing for flexible configuration so you can explore the pros and cons of different approaches. It is also compatible with any large model that supports the OpenAI API (e.g., Qwen, DeepSeek, GLM, Ollama).
+The project integrates various retrieval strategies (such as similarity, BM25, and multi-path retrieval), allowing for flexible configuration so you can explore the pros and cons of different approaches. It is also compatible with any large model that supports the OpenAI API (e.g., Qwen, DeepSeek, GLM, Ollama).
 
 The frontend is built with **Vue 3**, featuring a clean, modern interface that supports multi-user and multi-session capabilities. We hope you enjoy using it! 😘
 
@@ -64,8 +64,8 @@ conda install -c pytorch faiss-cpu
 # Navigate to the frontend directory
 cd frontend
 
-# Install npm dependencies (using a mirror is recommended for faster downloads)
-npm config set registry https://registry.npm.taobao.org/
+# Install npm dependencies (using a mirror is recommended for faster downloads), this may take a while, so feel free to take a break
+npm config set registry https://registry.npmmirror.com
 npm install
 ```
 
@@ -90,11 +90,11 @@ npm run dev
 
 ### 4. Quick Start
 
-1.  **Register and Log In**: With both services running, open the frontend URL in your browser. You will need to register a new account on your first visit.
+1.  **Register and Log In**: With both services running, open the frontend URL in your browser. You will need to register a new account on your first visit; you can use any username and password.
 
     <img src="./images/Login.png"  width="600" />
 
-2.  **Configure Models**: After logging in, you must go to the **Configuration Page** to set up your API keys and Base URLs.
+2.  **Configure Models**: After logging in, you will be directed to the **Configuration Page** to enter the necessary API Keys and Base URLs. To modify the configuration later, click on your profile information in the sidebar and select "Modify Configuration".
 
     <img src="./images/ConfigV2.png"  width="600" />
 
@@ -160,7 +160,7 @@ The V2 mode simulates human search behavior by retrieving entire web pages, aimi
 5.  **Content Generation**: The full content of the top-ranked web pages is passed as context to the LLM to generate the final answer.
 
 **Design Philosophy**:
-When humans search, they rarely read every single search result. We typically find a solution by browsing just two or three relevant pages. Before diving deep, we skim the pages to assess their relevance and quality. The traditional RAG approach (V1) often retrieves scattered and repetitive knowledge snippets from different pages. In contrast, retrieving entire web pages (V2) provides more detailed and systematic context, helping the model better understand the user's core problem.
+When humans search, they rarely read every single result. We typically find a solution by browsing just two or three relevant pages. Before diving deep, we skim the pages to assess their relevance and quality, spending time only on high-quality content. The traditional RAG approach (V1) often retrieves scattered and repetitive knowledge snippets from different pages, which can hinder the model's ability to form a systematic understanding. In contrast, retrieving entire web pages (V2) provides more detailed and coherent context, helping the model better understand the user's core problem.
 </details>
 
 
@@ -191,6 +191,12 @@ TinyAISearch/
    ├─ retrieval.py               # V1 Traditional RAG retrieval
    └─ search_web.py              # Search engine wrapper
 ```
+
+## TODO List
+- File uploading and parsing
+- Support for image uploads
+- Optimize the memory mechanism
+- Add visualization for the model's thinking process (Currently, when using an inference model, the thinking process is not displayed, only the final answer. It is normal for the model to take some time to respond).
 
 ## 🤝 Community & Contributions
 

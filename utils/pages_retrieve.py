@@ -115,8 +115,8 @@ class Retrieval_v2:
                 continue
 
             logger.info(f"Processing {len(pages)} pages for query: '{query}'")
-            contents_for_embedding = [p.get('content', '')[:self.EMBEDDING_MAX_LENGTH] for p in pages]
-            contents_for_bm25 = [p.get('content', '') for p in pages]
+            contents_for_embedding = ["Title: " + p.get('title', '') + " Content: " + p.get('content', '')[:self.EMBEDDING_MAX_LENGTH] for p in pages]
+            contents_for_bm25 = ["Title: " + p.get('title', '') + " Content: " + p.get('content', '') for p in pages]
             logger.info("Calculating embedding similarities...")
             page_embeddings = self._embed_texts(contents_for_embedding)
             query_emb = query_embedding_map.get(query)
@@ -129,13 +129,14 @@ class Retrieval_v2:
             logger.info(f'norm_embedding_scores: {norm_embedding_scores}')
             logger.info(f'norm_bm25_scores: {norm_bm25_scores}')
 
-            combined_scores = norm_embedding_scores + norm_bm25_scores
+            combined_scores = norm_embedding_scores + 0.7*norm_bm25_scores
             for i, page in enumerate(pages):
                 page['embedding_score'] = norm_embedding_scores[i]
                 page['bm25_score'] = norm_bm25_scores[i]
                 page['combined_score'] = combined_scores[i]
 
             sorted_pages = sorted(pages, key=lambda x: x['combined_score'], reverse=True)
+            logger.info(f"Sorted pages: {sorted_pages}")
             final_results[query] = sorted_pages[:top_k]
             logger.info(f"Selected top {len(final_results[query])} pages for query '{query}'.")
 

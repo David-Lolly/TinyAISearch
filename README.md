@@ -1,10 +1,10 @@
 
 
 # 🔍 TinyAISearch ✨
+[ 简体中文 | [English](README_EN.md) ]
 
 <img src="./images/ChatMessage.png"  width="100%" />
 
-[ 简体中文 | [English](README_EN.md) ]
 
 ---
 
@@ -68,8 +68,8 @@ conda install -c pytorch faiss-cpu
 # 进入前端目录
 cd frontend
 
-# 安装 npm 依赖 (建议使用国内镜像源加速)
-npm config set registry https://registry.npm.taobao.org/
+# 安装 npm 依赖 (建议使用国内镜像源加速)，整个过程需要点时间，可以休息等待一会
+npm config set registry https://registry.npmmirror.com
 npm install
 ```
 
@@ -98,7 +98,7 @@ npm run dev
 
     <img src="./images/Login.png"  width="600" />
 
-2.  **配置模型**：登录后，请务必先进入 **配置页面** 填写必要的 API Key 和 Base URL。
+2.  **配置模型**：登录后，将进入 **配置页面** 填写必要的 API Key 和 Base URL,后续想要更改配置，可以在侧边栏点击个人信息，在弹出的“修改配置”中进行修改。
 
     <img src="./images/ConfigV2.png"  width="600" />
 
@@ -196,6 +196,12 @@ TinyAISearch/
    └─ search_web.py              #  搜索引擎封装
 ```
 
+## TODO List
+- 文件上传与解析
+- 支持图片上传
+- 优化记忆机制
+- 增加对推理模型思考过程的展示（目前使用推理模型，思考过程不会显示，只显示回答内容，若使用推理模型太久没有响应属于正常情况）
+
 ## 🤝 社区贡献
 
 我们非常欢迎来自社区的贡献！如果你有任何建议或问题，请随时：
@@ -203,7 +209,7 @@ TinyAISearch/
 -   提交 **[Issue](https://github.com/David-Lolly/TinyAISearch/issues)**
 -   创建 **[Pull Request](https://github.com/David-Lolly/TinyAISearch/pulls)**
 
----
+
 
 
 
