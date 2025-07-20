@@ -1,3 +1,4 @@
+import logging
 import threading
 import utils.database as db
 
@@ -60,11 +61,15 @@ class ConfigManager:
                 value = self.get(key)
                 if not value:
                     print(f"Google search enabled, but required key '{key}' is missing or empty. Value: '{value}'")
+                    logging.error(f"Google search enabled, but required key '{key}' is missing or empty. Value: '{value}'")
                     all_present = False
                 else:
                     print(f"Google search enabled, required key '{key}' found with value: '{value}'")
-        
+                    logging.info(f"Google search enabled, required key '{key}' found with value: '{value}'")
+        else:
+            logging.info("Google search disabled")
         print(f"Final configured status: {all_present}")
+        logging.info(f"Final configured status: {all_present}")
         return all_present
 config = ConfigManager()
 

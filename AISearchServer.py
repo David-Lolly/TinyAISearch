@@ -127,7 +127,7 @@ async def test_llm_connection(req: TestRequest):
     try:
         await client.chat.completions.create(
             model=req.model_name,
-            messages=[{"role": "user", "content": "Hello"}],
+            messages=[{"role": "user", "content": "Hi"}],
             max_tokens=2
         )
         return {"success": True, "message": "LLM连接成功"}
@@ -188,7 +188,7 @@ async def test_google_connection(req: TestRequest):
         return {"success": False, "message": "API Key和CSE ID不能为空"}
     try:
         search_instance = Search()
-        await search_instance.google_search("test", api_key=req.api_key, cse_id=req.cse_id)
+        await search_instance.google_search("news", api_key=req.api_key, cse_id=req.cse_id)
         return {"success": True, "message": "Google Search连接成功"}
     except Exception as e:
         logger.error(f"Google Search连接测试失败: {e}")
