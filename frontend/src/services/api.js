@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // The base URL should be a relative path so that the Vite proxy can catch it.
 // All requests to /api/... will be proxied to http://localhost:5000/api/...
-// const API_BASE_URL = '/api';
+// const API_BASE_URL = '/backend';
 const API_BASE_URL = '';
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -13,16 +13,23 @@ const api = axios.create({
 });
 
 // 请求拦截器
-api.interceptors.request.use(
-  (config) => {
-    console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
-    return config;
-  },
-  (error) => {
-    console.error('API Request Error:', error);
-    return Promise.reject(error);
-  }
-);
+// api.interceptors.request.use(
+//   (config) => {
+//     // 核心修复逻辑：防止出现 /api/api/ 的情况
+//     // 如果 baseURL 是 /api, 且请求的 url 也以 /api/ 开头,
+//     // 则从请求 url 中移除多余的 /api/ 前缀。
+//     if (config.baseURL === '/api' && config.url.startsWith('/api/')) {
+//       console.log('Removing redundant /api/ prefix from request URL:', config.url);
+//       config.url = config.url.substring(4); // 从第5个字符开始截取，即移除 '/api'
+//     }
+//     console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
+//     return config;
+//   },
+//   (error) => {
+//     console.error('API Request Error:', error);
+//     return Promise.reject(error);
+//   }
+// );
 
 // 响应拦截器
 api.interceptors.response.use(

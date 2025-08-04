@@ -60,13 +60,13 @@ router.beforeEach(async (to, from, next) => {
   try {
     const response = await api.get('/api/status');
     const configured = response.data?.configured;
-    console.log(`[DEBUG] /api/status configured=${configured}`);
+    console.log(`[DEBUG] /status configured=${configured}`);
     if (!configured) {
       console.log('[DEBUG] 系统未配置，跳转至 Config');
       return next({ name: 'Config' });
     }
   } catch (error) {
-    console.error('[DEBUG] 获取 /api/status 失败，假定未配置', error);
+    console.error('[DEBUG] 获取/status 失败，假定未配置', error);
     sessionStorage.clear();
     return next({ name: 'Config' });
   }

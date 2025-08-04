@@ -8,8 +8,8 @@ services:
       dockerfile: backend.Dockerfile
     container_name: tinyai-backend
     restart: always
-    volumes:
-      - ./container/app:/app
+    # volumes:
+    #   - ./container/app:/app
       # - backend_logs:/app/logs
     # networks: 
     #   - my-network
