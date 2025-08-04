@@ -216,7 +216,7 @@ async function saveConfiguration() {
     const settingsToSave = { ...config, google_search_enabled: String(config.google_search_enabled) };
     await api.post('/api/settings', { settings: settingsToSave });
     alert('配置已成功保存！即将进入对话界面。');
-    router.push({ name: 'Chat', query: { fromConfigSave: 'true' } });
+    router.push({ name: 'Chat', query: { fromConfigSave: 'true' } }); 
   } catch (error) {
     alert('保存失败: ' + (error.response?.data?.message || '未知错误'));
   } finally {

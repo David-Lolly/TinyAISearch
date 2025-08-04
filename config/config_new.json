@@ -1,0 +1,29 @@
+{  
+  "LLM": {
+    "model_name": "qwen-turbo",  
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",  
+    "api_key": "sk-039cdaf2c5e34df88975be04a5d1f203",
+    "description":"model_name填写大模型名称，base_url填写该模型厂商的base_url,api_key填写你创建的api key"
+  },
+  "embedding_model": {
+    "model_name": "text-embedding-v4",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings",  
+    "api_key": "sk-039cdaf2c5e34df88975be04a5d1f203",
+    "description":"model_name填写embedding模型名称，base_url填写该模型厂商的base_url,api_key填写你创建的api key"
+  },
+  "rerank_model": {
+    "model_name": "BAAI/bge-reranker-v2-m3",
+    "base_url": "https://api.siliconflow.cn/v1/rerank",
+    "api_key": "sk-gkjqhyewefoqsyjkczpwemxtypfvokmbhajaduwlkauvsvxd",
+    "description":"model_name填写rerank模型名称，base_url填写该模型厂商的base_url,api_key填写你创建的api key"  
+  },  
+  "retrieval": {  
+    
+  },  
+  "search_engine": {  
+    "name": "baidu",
+    "api_key": "AIzaSyAFqqMEQPcjyP0fmZhUh6HWrJG5oZ2x7bI",  
+    "cse": "b25cbdf4436e64319",  
+    "description": "name可以在baidu、google和serper三者之间选择。baidu使用python库，不需要管api_key和cse，可以直接使用；google需要填写对应的api_key和cse；serper只需要填写对应的api_key，不用管cse。google和serper的搜索结果优于baidu"  
+  }
+}

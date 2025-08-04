@@ -1,6 +1,7 @@
 import json
 from typing import List, Dict
-from faiss import logger
+# from faiss import logger
+import logging
 from langchain_core.documents import Document
 from .retrieval_method import BM25, split_doc_direct, Rerank, Similarity
 import logging

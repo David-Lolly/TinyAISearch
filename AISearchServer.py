@@ -22,7 +22,7 @@ logging.basicConfig(
     filename='./logs/app.log',
     encoding='utf-8',
     filemode='a',
-    level=logging.WARNING
+    level=logging.INFO
 )
 
 logger = logging.getLogger(__name__)
@@ -46,6 +46,8 @@ import httpx
 async def lifespan(app: FastAPI):  # type: ignore
     db.create_tables()
     logger.info("数据库表已检查/创建完成。")
+    config.initialize_config() 
+    logger.info("配置管理器已初始化。")
     yield
 app = FastAPI(lifespan=lifespan)
 
@@ -117,7 +119,8 @@ async def save_settings_api(payload: dict):
         return {"status": "error", "message": "未提供设置数据。"}
     db.save_settings(settings_data)
     config.load_config() # Reload config in the manager
-    return {"status": "success", "message": "设置保存成功。"}
+    is_configured_now = config.is_configured()
+    return {"status": "success", "message": "设置保存成功。", "configured": is_configured_now}
 
 @app.post("/api/test/llm")
 async def test_llm_connection(req: TestRequest):
@@ -332,7 +335,9 @@ async def get_all_sessions(user_id: str):
 
 @app.get("/sessions/{session_id}/messages")
 async def get_session_messages(session_id: str):
+
     messages = db.get_messages(session_id)
+    logger.info(f"获取session_id:{session_id}的会话消息: {messages}")
     return messages
 
 

@@ -9,13 +9,11 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-import faiss
+import chromadb
+from langchain_chroma import Chroma
 from langchain_community.retrievers import BM25Retriever
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
 from tqdm import tqdm
 from langchain.retrievers.document_compressors.cross_encoder_rerank import CrossEncoderReranker
-from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
@@ -25,7 +23,7 @@ from .config_manager import config
 
 logger = logging.getLogger(__name__)
 
-
+# ... split_doc_direct 函数保持不变 ...
 def split_doc_direct(documents: List[Dict[str, Any]]) -> List[Document]:
     """
     将输入文档拆分为更小的文本块，便于后续检索和处理
@@ -36,7 +34,7 @@ def split_doc_direct(documents: List[Dict[str, Any]]) -> List[Document]:
     # 将输入文档转换为Langchain的Document对象
     langchain_docs = [Document(
         page_content=item.get('content', '') ,
-        metadata={'url': item.get('link', ''), 
+        metadata={'url': item.get('link', ''),
         'title': item.get('title', '')}
     ) for item in documents]
 
@@ -57,7 +55,7 @@ class Similarity():
     """
     文本相似度检索和嵌入处理类。
     - 云端模式使用并发请求和批量处理进行优化。
-    - 云端模式使用FAISS HNSW索引以加速检索。
+    - 底层向量数据库已从 FAISS 替换为 Chroma。
     - 提供多种相似度检索方法。
     """
 
@@ -93,8 +91,7 @@ class Similarity():
             "Content-Type": "application/json"
         })
 
-
-
+    # embed_documents 和 _embed_batch_cloud 方法保持不变
     def _embed_batch_cloud(self, batch_of_texts: List[str]) -> Optional[List[List[float]]]:
         """Embeds a batch of texts using the cloud API with retry logic."""
         payload = {
@@ -161,27 +158,64 @@ class Similarity():
             raise RuntimeError("All document embeddings failed. Check API key, URL, and network connection.")
         return results
 
-    def faiss_retrieve(self, split_docs: List[Document]) -> Tuple[Optional[faiss.Index], List[Document]]:
-        """Builds a high-speed FAISS HNSW index for retrieval."""
+    # ------------------ 修正后的数据库构建逻辑 ------------------
+
+    def build_chroma_store(self, split_docs: List[Document]) -> Tuple[Optional[Chroma], List[Document]]:
+        """
+        使用预嵌入的向量和文档构建一个Chroma向量存储（修正版）。
+        """
+        # 1. 嵌入文档，逻辑保持不变
         document_embeddings = self.embed_documents(split_docs)
         if not document_embeddings:
+            logger.warning("No documents were successfully embedded. Cannot build Chroma store.")
             return None, []
 
-        vectors = np.array([item['vector'] for item in document_embeddings]).astype('float32')
+        # 2. 准备建库所需的数据
+        #    这满足了您“元数据文档务必是indexed_docs”的要求
+        vectors = [item['vector'] for item in document_embeddings]
+        page_contents = [item['page_content'] for item in document_embeddings]
+        metadatas = [item['metadata'] for item in document_embeddings]
+        # Chroma 需要一个唯一的字符串ID列表
+        ids = [str(i) for i in range(len(page_contents))]
+        
+        # 将成功嵌入的文档重新包装为 Document 对象，以保持返回签名一致
         indexed_docs = [
             Document(page_content=item['page_content'], metadata=item['metadata'])
             for item in document_embeddings
         ]
-        d = vectors.shape[1]
 
-        M = 32  
-        hnsw_index = faiss.IndexHNSWFlat(d, M, faiss.METRIC_L2)
-        hnsw_index.hnsw.efConstruction = 40  # Search depth during construction
-        logger.info(f"Building HNSW index with {vectors.shape[0]} vectors...")
-        hnsw_index.add(vectors)
-        hnsw_index.hnsw.efSearch = 16  # Search depth during querying
-        logger.info("HNSW index built successfully.")
-        return hnsw_index, indexed_docs
+        logger.info(f"Building Chroma store with {len(indexed_docs)} vectors...")
+
+        try:
+            # 3. **正确流程**：创建客户端和集合，然后添加数据
+            # 创建一个临时的内存客户端
+            client = chromadb.Client()
+            # 创建一个集合，如果已存在则获取它
+            collection = client.get_or_create_collection(name="retrieval_collection")
+
+            # 将向量、文档、元数据和ID添加到集合中
+            collection.add(
+                embeddings=vectors,
+                documents=page_contents,
+                metadatas=metadatas,
+                ids=ids
+            )
+
+            # 4. **正确流程**：实例化 LangChain 的 Chroma 包装器以进行后续查询
+            # 注意：因为我们是手动添加数据并使用向量查询，所以这里不需要 embedding_function
+            chroma_store = Chroma(
+                client=client,
+                collection_name="retrieval_collection",
+                embedding_function=None # 明确设为 None
+            )
+
+            logger.info("Chroma store built successfully.")
+            return chroma_store, indexed_docs
+            
+        except Exception as e:
+            logger.error(f"Failed to build Chroma store: {e}", exc_info=True)
+            return None, []
+
 
     def query_embedding(self, query: str) -> Optional[np.ndarray]:
         """ Embeds a single query string."""
@@ -191,12 +225,14 @@ class Similarity():
         return None
 
     def similarity_retrieve(self, split_docs: List[Document], queries: List[str], top_k: int = 10) -> List[List[Document]]:
-        """ Retrieves the most relevant documents based on query content."""
+        """ Retrieves the most relevant documents based on query content using Chroma."""
         results = []
-        faiss_index, indexed_docs = self.faiss_retrieve(split_docs)
+        # 调用新的、修正后的方法构建 Chroma store
+        # indexed_docs 在这里不是必须的，因为信息已存入chroma_store，但为了保持签名一致性而接收它
+        chroma_store, _ = self.build_chroma_store(split_docs)
 
-        if faiss_index is None:
-            logger.error("FAISS index is not available. Cannot perform retrieval.")
+        if chroma_store is None:
+            logger.error("Chroma store is not available. Cannot perform retrieval.")
             return []
 
         for query in queries:
@@ -205,9 +241,11 @@ class Similarity():
                 logger.warning(f"Query '{query}' embedding failed, skipping retrieval for this query.")
                 continue
 
-            query_vector = query_vector.reshape(1, -1)
-            _distances, indices = faiss_index.search(query_vector, top_k)
-            retrieved_docs = [indexed_docs[i] for i in indices[0] if i != -1]
+            # 使用 Chroma 的 similarity_search_by_vector 方法进行查询
+            retrieved_docs = chroma_store.similarity_search_by_vector(
+                embedding=query_vector.tolist(),
+                k=top_k
+            )
             results.append(retrieved_docs)
 
         return results
@@ -226,7 +264,6 @@ class Similarity():
             doc_data['doc'] for doc_data in sorted(doc_scores.values(), key=lambda x: x['score'], reverse=True)[:top_k]
         ]
         return sorted_results
-
 
 
 
@@ -294,7 +331,7 @@ class Rerank():
             "query": query,
             "documents": documents,
             "top_n": top_k,
-            "return_documents": False  
+            "return_documents": False
         }
         try:
             assert self.rerank_base_url is not None
@@ -313,7 +350,7 @@ class Rerank():
             return []
 
         doc_contents = [doc.page_content for doc in results]
-        
+
         reranked_results = self._rerank_batch_cloud(doc_contents, query, top_k=k)
 
         if reranked_results is None:
@@ -332,11 +369,3 @@ class Rerank():
 
     def rerank(self, results: List[Document], query: str, k: int = 10) -> List[Document]:
         return self.rerank_cloud(results, query, k)
-
-
-
-
-
-
-
-

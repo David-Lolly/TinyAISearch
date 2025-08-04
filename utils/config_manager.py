@@ -6,14 +6,29 @@ class ConfigManager:
     _instance = None
     _lock = threading.Lock()
     _config = {}
+    _is_initialized = False
 
     def __new__(cls):
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super(ConfigManager, cls).__new__(cls)
-                    cls._instance.load_config()
+                    # cls._instance.load_config()
         return cls._instance
+
+    def initialize_config(self):
+        """
+        在数据库表创建完成后，被显式调用以初始化配置。
+        确保只加载一次。
+        """
+        if not self._is_initialized:
+            with self._lock: # 再次加锁确保多线程安全
+                if not self._is_initialized:
+                    print("Initializing configuration after tables created...")
+                    self.load_config()
+                    self._is_initialized = True
+        else:
+            print("ConfigManager already initialized.")
 
     def load_config(self):
         """Loads configuration from the database."""
