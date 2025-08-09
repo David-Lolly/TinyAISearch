@@ -5,12 +5,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ChatView from './views/ChatView.vue'
 import ConfigView from './views/ConfigView.vue'
 import LoginView from './views/LoginView.vue'
+import NotFoundView from './views/NotFoundView.vue'
 import api from './services/api'
 
 const routes = [
   { path: '/', name: 'Chat', component: ChatView },
   { path: '/login', name: 'Login', component: LoginView },
   { path: '/config', name: 'Config', component: ConfigView },
+  // 添加404路由处理 - 必须放在最后
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFoundView }
 ]
 
 const router = createRouter({

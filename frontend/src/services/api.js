@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // The base URL should be a relative path so that the Vite proxy can catch it.
 // All requests to /api/... will be proxied to http://localhost:5000/api/...
-// const API_BASE_URL = '/backend';
-const API_BASE_URL = '';
+const API_BASE_URL = '/backend';
+// const API_BASE_URL = '';
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

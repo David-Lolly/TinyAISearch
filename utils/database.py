@@ -3,8 +3,8 @@ import uuid
 from datetime import datetime
 import logging
 
-DATABASE_NAME = 'chat_history.db'
-CONFIG_DATABASE_NAME = 'config.db'
+DATABASE_NAME = 'chat_history_docker.db'
+CONFIG_DATABASE_NAME = 'config_docker.db'
 
 logger = logging.getLogger(__name__)
 

@@ -8,11 +8,14 @@ services:
       dockerfile: backend.Dockerfile
     container_name: tinyai-backend
     restart: always
-    # volumes:
-    #   - ./container/app:/app
-      # - backend_logs:/app/logs
-    # networks: 
-    #   - my-network
+    volumes:
+      # 挂载数据库文件到宿主机，确保数据持久化
+      - ./chat_history_docker.db:/app/chat_history_docker.db
+      - ./config_docker.db:/app/config_docker.db
+      # 挂载日志目录
+      - ./docker_logs:/app/logs
+    networks: 
+      - my-network
     # 注意：这里不需要暴露端口到主机，因为它只和Nginx代理通信
 
   # 前端服务
@@ -22,8 +25,8 @@ services:
       dockerfile: frontend.Dockerfile
     container_name: tinyai-frontend
     restart: always
-    # networks:
-    #   - my-network
+    networks:
+      - my-network
     # 同样，端口只在内部暴露给Nginx代理
 
   # Nginx 反向代理服务
@@ -38,13 +41,10 @@ services:
     depends_on:
       - backend
       - frontend
-    # networks:
-    #   - my-network
+    networks:
+      - my-network
 
-# volumes:
-#   backend_data:
-#   backend_logs:
-
-# networks:
-#   my-network:
-#     driver: bridge
+# 移除未使用的volumes定义，使用Bind Mount方式进行数据持久化
+networks:
+  my-network:
+    driver: bridge
