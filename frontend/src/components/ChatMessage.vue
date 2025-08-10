@@ -51,7 +51,7 @@
           
           <div v-if="message.content.trim()" class="space-y-4">
             
-            <div class="prose prose-base prose-slate max-w-none" v-html="formattedContent"></div>
+            <div class="prose prose-base prose-slate max-w-3xl" v-html="formattedContent"></div>
 
             
             <div v-if="message.content.trim() && !isStreaming" class="flex items-center justify-start -mt-2">
@@ -110,6 +110,8 @@ import { computed, onMounted, onUpdated, ref } from 'vue';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-light.css';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -123,6 +125,52 @@ const copyButtonText = ref('复制');
 
 const isUser = computed(() => props.message.role === 'user');
 const userInitial = computed(() => props.userId ? props.userId.charAt(0).toUpperCase() : 'Y');
+
+// 数学公式渲染函数
+const processMathFormulas = (text) => {
+  if (!text) return text;
+  
+  const mathPlaceholders = [];
+  let processedText = text;
+  
+  // 首先处理块级公式 $$...$$
+  processedText = processedText.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+    try {
+      const rendered = katex.renderToString(formula.trim(), {
+        displayMode: true,
+        throwOnError: false,
+        strict: false,
+        output: 'html'
+      });
+      const placeholder = `MATH_PLACEHOLDER_${mathPlaceholders.length}`;
+      mathPlaceholders.push(rendered);
+      return placeholder;
+    } catch (e) {
+      console.warn('LaTeX render error:', e);
+      return match; // 如果渲染失败，返回原文
+    }
+  });
+  
+  // 然后处理行内公式 $...$
+  processedText = processedText.replace(/\$([^$\n]+?)\$/g, (match, formula) => {
+    try {
+      const rendered = katex.renderToString(formula.trim(), {
+        displayMode: false,
+        throwOnError: false,
+        strict: false,
+        output: 'html'
+      });
+      const placeholder = `MATH_PLACEHOLDER_${mathPlaceholders.length}`;
+      mathPlaceholders.push(rendered);
+      return placeholder;
+    } catch (e) {
+      console.warn('LaTeX render error:', e);
+      return match; // 如果渲染失败，返回原文
+    }
+  });
+  
+  return { processedText, mathPlaceholders };
+};
 
 marked.setOptions({
   gfm: true,
@@ -139,7 +187,20 @@ const formattedContent = computed(() => {
   let cleanContent = props.message.content
     .replace(/^提示：.*\n?/gm, '')
     .replace(/参考信息：.*$/s, '');
-  return marked(cleanContent);
+  
+  // 先提取并渲染数学公式，用占位符替代
+  const { processedText, mathPlaceholders } = processMathFormulas(cleanContent);
+  
+  // 处理markdown
+  let htmlContent = marked(processedText);
+  
+  // 最后将占位符替换为渲染好的数学公式
+  mathPlaceholders.forEach((mathHtml, index) => {
+    const placeholder = `MATH_PLACEHOLDER_${index}`;
+    htmlContent = htmlContent.replace(new RegExp(placeholder, 'g'), mathHtml);
+  });
+  
+  return htmlContent;
 });
 
 const flattenedReferences = computed(() => {
@@ -388,6 +449,61 @@ onUpdated(setupCodeBlocks);
 
 .prose :where(blockquote p):last-of-type {
   margin-bottom: 0;
+}
+
+/* 分隔线样式优化 */
+.prose :where(hr) {
+  max-width: 100%;
+  margin: 1.5rem 0;
+  border: none;
+  height: 1px;
+  background: #d1d5db;
+  opacity: 0.8;
+}
+
+/* 确保列表和其他元素也有合适的宽度 */
+.prose :where(ul, ol) {
+  max-width: 100%;
+}
+
+.prose :where(li) {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* 数学公式样式 */
+.prose .katex {
+  font-size: 1.1em;
+}
+
+.prose .katex-display {
+  margin: 1.5em 0;
+  text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.prose .katex-display > .katex {
+  display: inline-block;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* 行内数学公式 */
+.prose .katex-inline {
+  margin: 0 0.1em;
+}
+
+/* 数学公式在移动端的适配 */
+@media (max-width: 768px) {
+  .prose .katex-display {
+    margin: 1em 0;
+    padding: 0 0.5em;
+  }
+  
+  .prose .katex {
+    font-size: 1em;
+  }
 }
 
 .animate-fade-in {
