@@ -1,5 +1,7 @@
 chat_history.db
 config.db
+chat_history_docker.db
+config_docker.db
 ./test
 ./Notes
 ./logs

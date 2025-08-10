@@ -1,11 +1,11 @@
 <template>
   <div class="sidebar-container">
     <aside
-      class="sidebar-main bg-background-secondary text-text-primary transition-all duration-300 ease-in-out fixed top-0 left-0 h-full z-40 flex flex-col shadow-xl border-r border-neutral-200"
-      :class="[
-        'w-72',
-        isOpen ? 'translate-x-0' : '-translate-x-72'
-      ]"
+      class="sidebar-main bg-background-secondary text-text-primary transition-all duration-300 ease-in-out fixed top-0 h-full z-40 flex flex-col shadow-xl border-r border-neutral-200 w-72"
+      :style="{
+        left: '0px',
+        transform: isOpen ? 'translateX(0px)' : 'translateX(-288px)'
+      }"
     >
       <div class="sidebar-header p-4 flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
@@ -17,13 +17,28 @@
             </div>
           </div>
 
-          <button
-            @click="$emit('toggle')"
-            class="group p-2 text-text-secondary hover:text-text-primary hover:bg-neutral-200/60 rounded-lg transition-colors duration-200"
-            title="收起侧边栏"
-          >
-            <ChevronLeftIcon class="w-5 h-5" />
-          </button>
+          <div class="relative group">
+            <button
+              @click="$emit('toggle')"
+              class="flex items-center justify-center w-11 h-11 bg-transparent hover:bg-neutral-200/60 rounded-md transition-all duration-200 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+            >
+              <!-- 侧边栏图标：矩形 + 左侧1/4位置的竖线 -->
+              <svg class="w-6 h-5 text-gray-400 group-hover:text-gray-600" fill="currentColor" viewBox="0 0 24 20">
+                <!-- 外边框矩形 -->
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <!-- 左侧竖线，位于1/4位置 -->
+                <line x1="7" y1="3" x2="7" y2="17" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </button>
+                         <!-- 气泡提示 -->
+             <div class="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-60">
+               <div class="bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg whitespace-nowrap relative">
+                 收起侧边栏
+                 <!-- 小三角箭头 -->
+                 <div class="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
+               </div>
+             </div>
+          </div>
         </div>
 
         <button
@@ -123,14 +138,53 @@
       </div>
     </aside>
 
-    <button
-      v-if="!isOpen"
-      @click="$emit('toggle')"
-      class="group fixed top-5 left-5 z-50 p-2.5 bg-background-card text-text-primary rounded-lg shadow-floating border border-neutral-200 hover:scale-105 transition-all duration-300"
-      title="展开侧边栏"
-    >
-      <Bars3Icon class="w-5 h-5" />
-    </button>
+    <!-- 侧边栏收起时的按钮组 -->
+    <div v-if="!isOpen" class="fixed top-5 left-5 z-50 flex flex-col items-center space-y-3">
+      <!-- 打开侧边栏按钮 -->
+      <div class="relative group">
+        <button
+          @click="$emit('toggle')"
+          class="flex items-center justify-center w-11 h-11 bg-transparent hover:bg-gray-50 rounded-md transition-all duration-200 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+        >
+          <!-- 侧边栏图标：矩形 + 左侧1/4位置的竖线 -->
+          <svg class="w-6 h-5 text-gray-400 group-hover:text-gray-600" fill="currentColor" viewBox="0 0 24 20">
+            <!-- 外边框矩形 -->
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <!-- 左侧竖线，位于1/4位置 -->
+            <line x1="7" y1="3" x2="7" y2="17" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+        <!-- 气泡提示 -->
+        <div class="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-60">
+          <div class="bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg whitespace-nowrap relative">
+            打开侧边栏
+            <!-- 小三角箭头 -->
+            <div class="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 新建对话按钮 -->
+      <div class="relative group">
+        <button
+          @click="$emit('new-chat')"
+          class="flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-200 shadow-sm"
+          style="background-color: rgb(201, 100, 66);"
+        >
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+        </button>
+        <!-- 气泡提示 -->
+        <div class="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-60">
+          <div class="bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg whitespace-nowrap relative">
+            新建对话
+            <!-- 小三角箭头 -->
+            <div class="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div
       v-if="isOpen"
@@ -145,7 +199,6 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import {
   Bars3Icon,
-  ChevronLeftIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   PlusIcon,
@@ -231,6 +284,7 @@ onUnmounted(() => {
 
 .sidebar-main {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
 .sidebar-overlay {

@@ -21,13 +21,6 @@ const router = createRouter({
   routes,
 })
 
-
-
-
-
-
-
-
 router.beforeEach(async (to, from, next) => {
   const userId = sessionStorage.getItem('userId');
 

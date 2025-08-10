@@ -233,6 +233,9 @@ class Crawl:
         return None
 
     def crawl(self, search_results: Dict[str, List[Dict]]) -> Dict[str, List[Dict]]:
+        """
+        search_results: {query: [{'id': 0, 'title': 'title', 'link': 'link'}, {'id': 1, 'title': 'title', 'link': 'link'}]}
+        """
         crawled_results = {query: [] for query in search_results.keys()}
         tasks = []
 

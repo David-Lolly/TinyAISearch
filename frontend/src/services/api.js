@@ -12,24 +12,7 @@ const api = axios.create({
   timeout: 120000, // 2分钟超时
 });
 
-// 请求拦截器
-// api.interceptors.request.use(
-//   (config) => {
-//     // 核心修复逻辑：防止出现 /api/api/ 的情况
-//     // 如果 baseURL 是 /api, 且请求的 url 也以 /api/ 开头,
-//     // 则从请求 url 中移除多余的 /api/ 前缀。
-//     if (config.baseURL === '/api' && config.url.startsWith('/api/')) {
-//       console.log('Removing redundant /api/ prefix from request URL:', config.url);
-//       config.url = config.url.substring(4); // 从第5个字符开始截取，即移除 '/api'
-//     }
-//     console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
-//     return config;
-//   },
-//   (error) => {
-//     console.error('API Request Error:', error);
-//     return Promise.reject(error);
-//   }
-// );
+
 
 // 响应拦截器
 api.interceptors.response.use(

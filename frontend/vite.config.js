@@ -11,21 +11,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // 关键改动：只保留一个 /api 规则
-      '/api': {
-        target: 'http://localhost:5000', // 你的后端地址
-        changeOrigin: true,
-        // 关键改动：重写路径，去掉 /api 前缀
-        // 这样，发往后端的请求就是 /login, /sessions 等，而不是 /api/login
-        // rewrite: (path) => path.replace(/^\/api/, ''),
-        // rewrite: (path) => path.replace(/^\/api/, ''),
-      },
       '/backend': {
         target: 'http://localhost:5000', // 你的后端地址
         changeOrigin: true,
-        // 关键改动：重写路径，去掉 /api 前缀
-        // 这样，发往后端的请求就是 /login, /sessions 等，而不是 /api/login
-        // rewrite: (path) => path.replace(/^\/api/, ''),
         rewrite: (path) => path.replace(/^\/backend/, ''),
       },
       // 其他代理规则可以继续添加

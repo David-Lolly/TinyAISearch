@@ -81,6 +81,7 @@ class TestRequest(BaseModel):
     base_url: Optional[str] = None
     api_key: Optional[str] = None
     cse_id: Optional[str] = None
+    
 async def stream_json(data_type: str, content: any):
     message = {
         "type": data_type,

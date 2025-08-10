@@ -12,7 +12,9 @@
       @edit-config="navigateToConfig" />
 
     <main class="relative flex-1 flex flex-col transition-all duration-300 ease-in-out"
-          :class="isSidebarOpen ? 'ml-72' : 'ml-0'">
+          :style="{
+            marginLeft: isSidebarOpen ? '288px' : '0px'
+          }">
 
       <div class="flex-1 overflow-y-auto px-6 pt-4" ref="messagesContainer">
         <div v-if="!currentSessionId" class="flex items-center justify-center h-full">
