@@ -116,21 +116,21 @@ def keywords_extract(query: str,chat_history: List = []) -> Optional[Dict[str, A
 
         ### eg1:
 
-        **User Input:** 今天武汉天气如何？
+        **User Input:** 2025-08-16武汉天气如何？
 
         **Output:**
 
         {{
         "query_analysis": {{
-            "original_query": "今天武汉天气如何？",
+            "original_query": "2025-08-16武汉天气如何？",
             "identified_intent": "[Specific_Fact_Lookup]",
             "assessed_complexity": "[Simple]",
-            "key_entities": ["{current_date}武汉天气"],
+            "key_entities": ["8月16日武汉天气"],
             "implicit_questions": []
         }},
         "search_plan": {{
             "foundational_queries": [
-            {{"query": "{current_date}武汉天气预报", "engine": "baidu"}}
+            {{"query": "8月16日武汉天气预报", "engine": "baidu"}}
             ],
             "expansion_deep_dive_queries": []
         }}

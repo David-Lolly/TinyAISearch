@@ -6,3 +6,6 @@ config_docker.db
 ./Notes
 ./logs
 ./config
+./.idea
+./pycache
+./docker_logs

@@ -5,8 +5,24 @@ import asyncio
 from typing import List, Optional
 from contextlib import asynccontextmanager
 from logging.handlers import RotatingFileHandler
-
+from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import uvicorn
 from langchain_core.documents import Document
+from fastapi import FastAPI, Request, Body, HTTPException
+from openai import OpenAI, AsyncOpenAI
+import httpx
+import requests
+
+
+from utils.search_web import Search
+from utils.crawl_web import Crawl
+from utils.pages_retrieve import Retrieval_v2
+from utils.response import generate, search_generate
+from utils.retrieval import Retrieval_v1
+from utils.config_manager import config
+import utils.database as db
 
 dir_path = './logs'
 file_name = 'app.log'
@@ -16,37 +32,44 @@ if not os.path.exists(dir_path):
 if not os.path.exists(file_path):
     with open(file_path, 'w') as f:
         f.write('')
-logging.basicConfig(
-    format='%(levelname)s (%(asctime)s): %(message)s (Line: %(lineno)d [%(filename)s])',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    filename='./logs/app.log',
-    encoding='utf-8',
-    filemode='a',
-    level=logging.INFO
-)
+
+def setup_logging():
+    logging.basicConfig(
+        format='%(levelname)s (%(asctime)s): %(message)s (Line: %(lineno)d [%(filename)s])',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        filename='./logs/app.log',
+        encoding='utf-8',
+        filemode='a',
+        level=logging.INFO
+    )
+
+    third_party_loggers = [
+        'duckduckgo_search',
+        'httpx',
+        'requests',
+        'urllib3',
+        'openai',
+        'langchain',
+        'langchain_core',
+        'baidusearch',
+        'uvicorn',
+        'fastapi',         
+    ]
+
+    for logger_name in third_party_loggers:
+        logging.getLogger(logger_name).setLevel(logging.WARNING)
+
+
+
+setup_logging()
 
 logger = logging.getLogger(__name__)
-
-from fastapi import FastAPI, Request, Body, HTTPException
-from fastapi.responses import StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import uvicorn
-from utils.search_web import Search
-from utils.crawl_web import Crawl
-from utils.pages_retrieve import Retrieval_v2
-from utils.response import generate, search_generate
-from utils.retrieval import Retrieval_v1
-from utils.config_manager import config
-import utils.database as db
-from openai import OpenAI, AsyncOpenAI
-import httpx
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # type: ignore
     db.create_tables()
     logger.info("数据库表已检查/创建完成。")
-    config.initialize_config() 
+    config.initialize_config()
     logger.info("配置管理器已初始化。")
     yield
 app = FastAPI(lifespan=lifespan)
@@ -81,7 +104,7 @@ class TestRequest(BaseModel):
     base_url: Optional[str] = None
     api_key: Optional[str] = None
     cse_id: Optional[str] = None
-    
+
 async def stream_json(data_type: str, content: any):
     message = {
         "type": data_type,
@@ -191,9 +214,18 @@ async def test_google_connection(req: TestRequest):
     if not req.api_key or not req.cse_id:
         return {"success": False, "message": "API Key和CSE ID不能为空"}
     try:
-        search_instance = Search()
-        await search_instance.google_search("news", api_key=req.api_key, cse_id=req.cse_id)
-        return {"success": True, "message": "Google Search连接成功"}
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            "q": "daily news",
+            "key": req.api_key,
+            "cx": req.cse_id,
+            "num": 5
+        }
+        response = requests.get(url, params=params, timeout=5)
+        if response.status_code == 200:
+            return {"success": True, "message": "Google Search连接成功"}
+        else:
+            return {"success": False, "message": "Google Search连接失败"}
     except Exception as e:
         logger.error(f"Google Search连接测试失败: {e}")
         return {"success": False, "message": f"连接失败: {str(e)}"}
@@ -227,16 +259,16 @@ async def search(req: SearchRequest):
                         chunk_str = chunk.decode('utf-8', errors='ignore')
                         assistant_response_text += chunk_str
                         yield await stream_json("answer_chunk", chunk_str)
-                
+
                 final_db_content = {"text": assistant_response_text, "references": []}
                 db.add_message(session_id, 'assistant', json.dumps(final_db_content, ensure_ascii=False))
                 return
             logger.info("准备搜索....")
             yield await stream_json("process", "正在分析问题...")
-            
+
             search_instance = Search()
             search_plan_data, search_results = await search_instance.search(req.query, chat_history=processed_history)
-            
+
             print(f"search_plan_data:{search_plan_data}")
             if not search_plan_data:
                 yield await stream_json("process", "该问题不需要搜索，直接回答...")
@@ -284,7 +316,7 @@ async def search(req: SearchRequest):
                 retrieval_v1 = Retrieval_v1()
                 all_web_pages = [page for pages in web_pages.values() for page in pages]
                 context = retrieval_v1.retrieve(queries=[req.query],search_plan_data=search_plan_data, web_pages=all_web_pages)
-            
+
 
             response_generator = search_generate(req.query, context, search_plan_data, chat_history=processed_history)
             if response_generator:
@@ -316,7 +348,7 @@ async def search(req: SearchRequest):
             logger.info(f"参考来源: {references}")
             if references:
                 yield await stream_json("reference", references)
-            
+
             final_db_content = {"text": assistant_response_text, "references": references}
             db.add_message(session_id, 'assistant', json.dumps(final_db_content, ensure_ascii=False))
             logger.info(f"助手回复及参考来源已添加至会话 {session_id}")
@@ -357,16 +389,16 @@ async def login(req: LoginRequest):
     if not req.user_id or not req.password:
         logger.error(f"登录尝试失败: 缺少用户ID或密码")
         raise HTTPException(status_code=400, detail="用户ID和密码为必填项")
-    
+
     logger.info(f"用户登录尝试: {req.user_id}")
-    
+
     # 验证用户是否存在并密码是否匹配
     is_valid = db.verify_user(req.user_id, req.password)
-    
+
     if not is_valid:
         logger.warning(f"用户登录失败: {req.user_id}")
         raise HTTPException(status_code=401, detail="无效的凭据或用户不存在")
-    
+
     logger.info(f"用户登录成功: {req.user_id}")
     return {"message": "登录成功", "user_id": req.user_id}
 
@@ -375,21 +407,21 @@ async def register(req: RegisterRequest):
     if not req.user_id or not req.password:
         logger.error("注册尝试失败: 缺少用户ID或密码")
         raise HTTPException(status_code=400, detail="用户ID和密码为必填项")
-    
+
     logger.info(f"用户注册尝试: {req.user_id}")
-    
+
     # 检查用户是否已存在
     user_exists = db.user_exists(req.user_id)
     if user_exists:
         logger.warning(f"注册失败: 用户已存在: {req.user_id}")
         raise HTTPException(status_code=409, detail="用户已存在")
-    
+
     # 注册新用户
     success = db.register_user(req.user_id, req.password)
     if not success:
         logger.error(f"注册用户失败: {req.user_id}")
         raise HTTPException(status_code=500, detail="注册用户失败")
-    
+
     logger.info(f"用户注册成功: {req.user_id}")
     return {"message": "注册成功", "user_id": req.user_id}
 

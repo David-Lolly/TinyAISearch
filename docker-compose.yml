@@ -6,28 +6,27 @@ services:
     build:
       context: .
       dockerfile: backend.Dockerfile
-    container_name: tinyai-backend
+    container_name: tinyai-search-backend
     restart: always
+    image: tinyai-search-backend:v1.0.0
     volumes:
       # 挂载数据库文件到宿主机，确保数据持久化
       - ./chat_history_docker.db:/app/chat_history_docker.db
       - ./config_docker.db:/app/config_docker.db
-      # 挂载日志目录
       - ./docker_logs:/app/logs
     networks: 
       - my-network
-    # 注意：这里不需要暴露端口到主机，因为它只和Nginx代理通信
 
   # 前端服务
   frontend:
     build:
       context: ./frontend
       dockerfile: frontend.Dockerfile
-    container_name: tinyai-frontend
+    container_name: tinyai-search-frontend
     restart: always
+    image: tinyai-search-frontend:v1.0.0
     networks:
       - my-network
-    # 同样，端口只在内部暴露给Nginx代理
 
   # Nginx 反向代理服务
   nginx-proxy:
@@ -37,14 +36,13 @@ services:
     ports:
       - "8080:80" # 将主机的 8080 端口映射到容器的 80 端口
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro # 将我们的配置文件挂载到容器中，:ro表示只读
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro 
     depends_on:
       - backend
       - frontend
     networks:
       - my-network
 
-# 移除未使用的volumes定义，使用Bind Mount方式进行数据持久化
 networks:
   my-network:
     driver: bridge

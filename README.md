@@ -32,22 +32,34 @@
 
 ### 1. 环境准备
 
-在开始之前，请确保你的本地环境中安装了以下软件：
+在开始之前，请根据部署方式确保你的本地环境中安装了对应软件：
+**1、源码部署**：
 
 - **Node.js**: `v18.0` 或更高版本。
 - **Python**: `v3.10`。
 - **Conda**: 用于管理 Python 虚拟环境。
 
+*2、docker部署**：
+- **Docker**
+- **Docker Compose**
+
 ### 2. 下载与安装
 
-#### ① 克隆项目仓库
+#### 克隆项目仓库
 
 ```sh
 git clone https://github.com/David-Lolly/TinyAISearch.git
 cd TinyAISearch
 ```
+#### Docker部署
+```sh
+docker-compose up -d
+# 等待容器构建后即可，启动成功后访问本机8080端口
+```
 
-#### ② 配置后端
+#### 源码部署
+
+#### 1、配置后端
 
 ```sh
 # 创建并激活 Conda 虚拟环境
@@ -62,7 +74,7 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 conda install -c pytorch faiss-cpu
 ```
 
-#### ③ 配置前端
+#### 2、配置前端
 
 ```sh
 # 进入前端目录
@@ -90,7 +102,7 @@ python AISearchServer.py
 ```sh
 npm run dev
 ```
-> 前端通常会运行在 `http://localhost:5173`，请留意终端输出的实际地址。
+> 前端通常会运行在 `http://localhost:5173`，请留意终端输出的实际地址，成功后即可打开浏览器访问。
 
 ### 4. 快速上手
 
@@ -121,6 +133,9 @@ npm run dev
 3.  **开始聊天**：配置完成后，即可开始你的 AI 搜索之旅！🎉
 
 ## 🔧 技术实现
+
+### API文档：
+请在doc目录下查看对应的API文档，了解后端各个版块的具体功能以及参数传递
 
 <details>
 <summary><strong>V1 检索模式 (点击展开)</strong></summary>
