@@ -87,7 +87,7 @@ class Search:
         if not final_api_key or not final_cse_id:
             logger.error("Google API Key/CSE ID 未配置，无法使用Google搜索。")
             return []
-
+        logger.info(f"Google搜索 '{query}'")
         def _search():
             try:
                 url = "https://www.googleapis.com/customsearch/v1"
@@ -125,9 +125,9 @@ class Search:
         为DuckDuckGo任务传递代理参数。
         """
         search_plan_data = keywords_extract(query, chat_history)
-        logger.info(f"search_plan_data:{search_plan_data}")
+        logger.info(f"search_plan_data:{json.dumps(search_plan_data,ensure_ascii=False,indent=2)}")
         if not search_plan_data:
-            logger.info(f'search_plan_data is None')
+            logger.info(f'search_plan_data 为空')
             return None, {"NO_SEARCH_NEEDED": []}
 
         search_results = {}

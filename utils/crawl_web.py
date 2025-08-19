@@ -256,7 +256,15 @@ class Crawl:
         
         for query in crawled_results:
             crawled_results[query] = sorted(crawled_results[query], key=lambda x: x['id'])
-        logger.info(f'crawled_results: {crawled_results}')
+        # Truncate content to first 500 characters for each crawled page
+        for query in crawled_results:
+            for result in crawled_results[query]:
+                if 'content' in result and result['content']:
+                    result['content'] = result['content'][:500]
+                    # Add ellipsis to indicate truncation
+                    if len(result['content']) >= 500:
+                        result['content'] += '...'
+        logger.info(f'crawled_results: {json.dumps(crawled_results,ensure_ascii=False,indent=2)}')
             
         return crawled_results
 

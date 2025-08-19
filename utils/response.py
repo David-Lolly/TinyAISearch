@@ -24,9 +24,9 @@ def generate(query, chat_history: Optional[List[dict]] = None):
         def error_stream():
             yield b"Error: LLM configuration is missing. Please configure the application."
         return error_stream()
-
-    system_message: ChatCompletionMessageParam = {"role": "system", "content": '你是AI搜索助手，名字叫做TinyAISearch，由乐乐开发，请根据用户的问题进行回答。'}
-    messages: List[ChatCompletionMessageParam] = [system_message]
+    current_date ='当前日期：'+ date.today().strftime("%Y-%m-%d")
+    system_message = {"role": "system", "content": '你是AI搜索助手，名字叫做TinyAISearch，由乐乐开发，{{current_date}}。请根据你和用户的聊天记录，以及当前用户的问题，充分理解用户意图，进行回答。'}
+    messages = [system_message]
     if chat_history:
         for msg in chat_history:
             if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
@@ -34,32 +34,48 @@ def generate(query, chat_history: Optional[List[dict]] = None):
             elif isinstance(msg, str): # 兼容旧的字符串格式历史（如果存在）
                 pass #  简单忽略无法处理的格式
                 
-    current_date ='当前日期：'+ date.today().strftime("%Y-%m-%d")
-    messages.append({"role": "user", "content": query+current_date})
-
+    
+    messages.append({"role": "user", "content": query})
+    logger.info(f'response_stage_messages:{json.dumps(messages, ensure_ascii=False, indent=2)}')
     client = OpenAI(
         api_key=api_key,
         base_url=base_url,
+        timeout=30  
     )
 
     
     def stream_generate():
         try:
+            logger.info("开始调用LLM API...")
+            import time
+            start_time = time.time()
+            
             assert model_name is not None
             response = client.chat.completions.create(
                 model=model_name,
                 messages=messages,
                 stream=True,
+                temperature=0.8,
                 stream_options={"include_usage": True}
             )
+            
+            logger.info(f"LLM API调用完成，耗时: {time.time() - start_time:.2f}秒")
+            
+            chunk_count = 0
             for chunk in response:
-                response = json.loads(chunk.model_dump_json())
+                if chunk_count == 0:
+                    logger.info(f"收到第一个chunk，总耗时: {time.time() - start_time:.2f}秒")
+                chunk_count += 1
+                
+                response_data = json.loads(chunk.model_dump_json())
                 try:
-                    content = response['choices'][0]['delta']['content']
+                    content = response_data['choices'][0]['delta']['content']
                     if content:  # 确保内容不为空
                         yield f"{content}".encode('utf-8')  # 将内容逐块发送给客户端
                 except Exception as e:
                     logger.error(f"Error extracting content from chunk: {e}")
+            
+            logger.info(f"流式响应完成，总共处理了{chunk_count}个chunks")
         except Exception as e:
             logger.error(f"Error: {str(e)}")
 
@@ -106,7 +122,7 @@ def search_generate(query: str, search_results: Union[Dict[str, List[Dict[str, A
     prompt = """# Role and Goal
         You are a top-tier AI Search Analyst. Your primary mission is to provide the user with a comprehensive, accurate, and critically-evaluated answer. You must synthesize and deeply analyze the provided search results, not just summarize them.
         You will be provided with the following information:
-        1.  **USER_QUERY**: The user's original question.
+        1.  **CURRENT_DATE**: The current date,if user's question is  related to current date,you should use it.
         2.  **IMPLICIT_QUESTIONS**: The underlying, deeper questions inferred from the user's query, which reveal their true intent.
         3.  **SEARCH_RESULTS**: A list of web pages containing a `Title`, `Content`. Treat this as raw, unverified data that requires rigorous scrutiny.
 
@@ -127,13 +143,30 @@ def search_generate(query: str, search_results: Union[Dict[str, List[Dict[str, A
         -   Your answer must use the same language as the user's question.
         -   The final output must be a well-written, thoughtful, and comprehensive response that directly answers the user's explicit and implicit questions.
         -   The answer must be grounded in the provided search results but elevated by your critical analysis.
-        -   If there is not enough information to provide a definitive answer, explain why and what information is missing."""
+        -   If there is not enough information to provide a definitive answer, explain why and what information is missing.
+        
+        CURRENT_DATE:
+        {current_date}
 
-    system_message: ChatCompletionMessageParam = {"role": "system", "content": prompt}
-    current_date ='CURRENT_DATE:'+ date.today().strftime("%Y-%m-%d")
-    user_query_with_context = f"{current_date}\\n USER_QUERY:{query}\\n\\n IMPLICIT_QUESTIONS:{json.dumps(implicit_questions, ensure_ascii=False, indent=2)}\\n\\n SEARCH_RESULTS:{json.dumps(retrieval_context, ensure_ascii=False, indent=2)}"
+        IMPLICIT_QUESTIONS:
+        {implicit_questions}
+
+        SEARCH_RESULTS:
+        {retrieval_context}
+        
+        
+        
+        """
+
+    implicit_questions = json.dumps(implicit_questions, ensure_ascii=False, indent=2)
+    retrieval_context = json.dumps(retrieval_context, ensure_ascii=False, indent=2)
+    current_date = date.today().strftime("%Y-%m-%d")
+
+    system_message = {"role": "system", "content": prompt.format(current_date=current_date, implicit_questions=implicit_questions, retrieval_context=retrieval_context)}
     
-    messages: List[ChatCompletionMessageParam] = [system_message]
+    
+    
+    messages = [system_message]
     if chat_history:
         for msg in chat_history:
             if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
@@ -141,22 +174,34 @@ def search_generate(query: str, search_results: Union[Dict[str, List[Dict[str, A
             elif isinstance(msg, str):
                 pass # 简单忽略无法处理的格式
                 
-    messages.append({"role": "user", "content": user_query_with_context})
-    logger.info(f'messages:{json.dumps(messages, ensure_ascii=False, indent=2)}')
-    client = OpenAI(api_key=api_key, base_url=base_url)
+    messages.append({"role": "user", "content": query})
+    logger.info(f'response_stage_messages:{json.dumps(messages, ensure_ascii=False, indent=2)}')
+    client = OpenAI(api_key=api_key, base_url=base_url, timeout=60.0)
     def stream_generate():
         try:
+            logger.info("开始调用LLM API (search_generate)...")
+            import time
+            start_time = time.time()
+            
             assert model_name is not None
             response = client.chat.completions.create(
                 model=model_name,
                 messages=messages,
                 stream=True,
-                stream_options={"include_usage": True}
+                temperature=0.5,
             )
+            
+            logger.info(f"LLM API调用完成 (search_generate)，耗时: {time.time() - start_time:.2f}秒")
+            
+            chunk_count = 0
             for chunk in response:
-                response = json.loads(chunk.model_dump_json())
+                if chunk_count == 0:
+                    logger.info(f"收到第一个chunk (search_generate)，总耗时: {time.time() - start_time:.2f}秒")
+                chunk_count += 1
+                
+                response_data = json.loads(chunk.model_dump_json())
                 try:
-                    content = response['choices'][0]['delta']['content']
+                    content = response_data['choices'][0]['delta']['content']
 
                     if content:  # 确保内容不为空
                         yield f"{content}".encode('utf-8')  # 将内容逐块发送给客户端
@@ -164,6 +209,8 @@ def search_generate(query: str, search_results: Union[Dict[str, List[Dict[str, A
                     pass # Ignore empty delta content
                 except Exception as e:
                     logger.warning(f"Error extracting content from chunk: {e}")
+            
+            logger.info(f"流式响应完成 (search_generate)，总共处理了{chunk_count}个chunks")
         except Exception as e:
                 logger.error(f"Error: {str(e)}")
 

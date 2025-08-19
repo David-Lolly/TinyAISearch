@@ -37,16 +37,12 @@ def keywords_extract(query: str,chat_history: List = []) -> Optional[Dict[str, A
 
         ## [CORE DIRECTIVE]
 
-        Based on the `[USER_QUERY]` , `[CURRENT_DATE]`and `[CHAT_HISTORY]` below, strictly follow the `[WORKFLOW]` and return the result in the format defined by `[OUTPUT_SCHEMA]`.
+        Based on the user input , current date and the history you talk with user below, strictly follow the `[WORKFLOW]` and return the result in the format defined by `[OUTPUT_SCHEMA]`.
 
-        ## [USER_QUERY]
-        {query}
 
         ## [CURRENT_DATE]
         {current_date}
 
-        ## [CHAT_HISTORY]
-        {history}
 
         ## [WORKFLOW]
 
@@ -198,29 +194,27 @@ def keywords_extract(query: str,chat_history: List = []) -> Optional[Dict[str, A
         }}
         """
     messages = []
-    logger.info(f'search_chat_history: {chat_history}')
     chat_history = chat_history[:6] if chat_history else []
+    # logger.info(f'search_chat_history: {chat_history}')
 
-    history_text = ""
-    if chat_history:
-        formatted_history_lines: List[str] = []
-        for msg in chat_history:
-            if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
-                role, content = msg['role'], msg['content']
-            elif isinstance(msg, str):
-                role, content = 'user', msg
-            else:
-                continue
-
-            speaker = "Human" if role in ("user", "human") else "AI"
-            formatted_history_lines.append(f"{speaker}: {content}")
-
-        history_text = "\n".join(formatted_history_lines)
 
     current_date = date.today().strftime("%Y-%m-%d")
-    formatted_prompt = final_prompt.format(query=query, current_date=current_date, history=history_text)
-    message = [{"role": "user", "content": formatted_prompt}]
-    logger.info(f'search_message: {message}')
+    system_message = {"role": "system", "content": final_prompt.format(current_date=current_date)}
+    
+    
+    
+    messages = [system_message]
+    if chat_history:
+        for msg in chat_history:
+            if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
+                messages.append({'role': msg['role'], 'content': msg['content']})
+            elif isinstance(msg, str):
+                pass 
+                
+    messages.append({"role": "user", "content": query})
+
+
+    logger.info(f'search_stage_prompt: {json.dumps(messages,ensure_ascii=False,indent=2)}')
     client = OpenAI(
         api_key=api_key,
         base_url=base_url,
@@ -228,8 +222,8 @@ def keywords_extract(query: str,chat_history: List = []) -> Optional[Dict[str, A
     try:
         completion = client.chat.completions.create(
             model=model_name,
-            messages=message,
-            temperature=0.2,
+            messages=messages,
+            temperature=0.3,
             response_format={"type": "json_object"}
         )
 

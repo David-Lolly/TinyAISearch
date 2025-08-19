@@ -80,10 +80,10 @@ class Retrieval_v1:
 
         similarity_results = self.similarity.similarity_retrieve(docs,[query],2*top_k)
         flat_similarity_results = [doc for sublist in similarity_results for doc in sublist]
-        logger.info(f"similarity_results: {flat_similarity_results}")
+        # logger.info(f"similarity_results: {flat_similarity_results}")
         rerank_results = self.rerank.rerank(flat_similarity_results, query, top_k)
         logger.info(f"rerank_results: {rerank_results}")
-        print(f'Rerank results: {rerank_results}')
+        # print(f'Rerank results: {rerank_results}')
 
         return rerank_results
 
@@ -101,11 +101,11 @@ class Retrieval_v1:
         """
         logger.info('Executing similarity+BM25+rerank for higher quality retrieval')
         bm25_results = self.bm25.bm25_retrieval(docs, queries, top_k)
-        logger.info(f"bm25_results: {bm25_results}")
+        # logger.info(f"bm25_results: {bm25_results}")
 
         similarity_results_nested = self.similarity.similarity_retrieve(docs, queries, top_k)
         similarity_results = [doc for sublist in similarity_results_nested for doc in sublist]
-        logger.info(f"similarity_results: {similarity_results}")
+        # logger.info(f"similarity_results: {similarity_results}")
         results_all = bm25_results + similarity_results
         rerank_results = self.rerank.rerank(results_all, queries[0], top_k)
         logger.info(f"rerank_results: {rerank_results}")

@@ -126,17 +126,17 @@ class Retrieval_v2:
             bm25_scores = self._get_bm25_scores(query, contents_for_bm25)
             norm_embedding_scores = softmax(embedding_scores) if np.any(embedding_scores) else embedding_scores
             norm_bm25_scores = softmax(bm25_scores) if np.any(bm25_scores) else bm25_scores
-            logger.info(f'norm_embedding_scores: {norm_embedding_scores}')
-            logger.info(f'norm_bm25_scores: {norm_bm25_scores}')
+            # logger.info(f'norm_embedding_scores: {norm_embedding_scores}')
+            # logger.info(f'norm_bm25_scores: {norm_bm25_scores}')
 
-            combined_scores = norm_embedding_scores + 0.7*norm_bm25_scores
+            combined_scores = norm_embedding_scores + 0.5*norm_bm25_scores
             for i, page in enumerate(pages):
                 page['embedding_score'] = norm_embedding_scores[i]
                 page['bm25_score'] = norm_bm25_scores[i]
                 page['combined_score'] = combined_scores[i]
 
             sorted_pages = sorted(pages, key=lambda x: x['combined_score'], reverse=True)
-            logger.info(f"Sorted pages: {sorted_pages}")
+            logger.info(f"Sorted pages: {json.dumps(sorted_pages,ensure_ascii=False,indent=2)}")
             final_results[query] = sorted_pages[:top_k]
             logger.info(f"Selected top {len(final_results[query])} pages for query '{query}'.")
 

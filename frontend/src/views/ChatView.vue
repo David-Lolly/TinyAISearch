@@ -281,7 +281,7 @@ const sendMessage = async () => {
 
   const query = userInput.value;
   messages.value.push({ role: 'user', content: query });
-  messages.value.push({ role: 'assistant', content: '', references: [] });
+  messages.value.push({ role: 'assistant', content: '', references: [], streamEnded: false });
 
   currentSearchSteps.value = [];
   userInput.value = '';
@@ -305,37 +305,53 @@ const sendMessage = async () => {
       payload,
       async (chunk) => {
         buffer += chunk;
-      let newlineIndex;
-      while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-        const line = buffer.slice(0, newlineIndex);
-        buffer = buffer.slice(newlineIndex + 1);
-        if (line.trim()) {
-          processStreamChunk(line);
-          await nextTick();
+        let newlineIndex;
+        while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+          const line = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 1);
+          if (line.trim()) {
+            processStreamChunk(line);
+            await nextTick();
+            // 关键改动：让出一帧时间，确保浏览器能绘制
+            await new Promise(resolve => requestAnimationFrame(resolve));
+          }
         }
-      }
       },
-      () => {},
+      () => {
+        // 流结束后触发最终的markdown渲染
+        const lastMsg = messages.value[messages.value.length - 1];
+        if (lastMsg && lastMsg.role === 'assistant') {
+          lastMsg.streamEnded = true;
+        }
+      },
       (error) => {
-    if (error.name === 'AbortError') {
-      console.log('Fetch aborted by user.');
-      const lastMsg = messages.value[messages.value.length - 1];
-      if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.content) {
-         lastMsg.content = '回答已停止。';
-      }
-    } else {
-      console.error('流处理错误:', error);
-      const lastMsg = messages.value[messages.value.length - 1];
-      if (lastMsg && lastMsg.role === 'assistant') {
-        lastMsg.content = `发生错误: ${error.message}`;
-      }
-    }
+        if (error.name === 'AbortError') {
+          console.log('Fetch aborted by user.');
+          const lastMsg = messages.value[messages.value.length - 1];
+          if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.content) {
+             lastMsg.content = '回答已停止。';
+             lastMsg.streamEnded = true;
+          }
+        } else {
+          console.error('流处理错误:', error);
+          const lastMsg = messages.value[messages.value.length - 1];
+          if (lastMsg && lastMsg.role === 'assistant') {
+            lastMsg.content = `发生错误: ${error.message}`;
+            lastMsg.streamEnded = true;
+          }
+        }
       },
       abortController.value.signal
     );
   } finally {
     isLoading.value = false;
     abortController.value = null;
+    // 确保最终渲染
+    await nextTick();
+    const lastMsg = messages.value[messages.value.length - 1];
+    if (lastMsg && lastMsg.role === 'assistant') {
+      lastMsg.streamEnded = true;
+    }
   }
 };
 

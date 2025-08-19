@@ -110,7 +110,7 @@ async def stream_json(data_type: str, content: any):
         "type": data_type,
         "payload": content
     }
-    print(f'message:{json.dumps(message,indent=2,ensure_ascii=False)}')
+    # print(f'message:{json.dumps(message,indent=2,ensure_ascii=False)}')
     return json.dumps(message, ensure_ascii=False) + '\n'
 
 def get_and_clean_history(session_id: str) -> List[dict]:
@@ -267,12 +267,14 @@ async def search(req: SearchRequest):
                         chunk_str = chunk.decode('utf-8', errors='ignore')
                         assistant_response_text += chunk_str
                         yield await stream_json("answer_chunk", chunk_str)
+                        await asyncio.sleep(0)  # 强制让出控制权，立即发送
 
                 final_db_content = {"text": assistant_response_text, "references": []}
                 db.add_message(session_id, 'assistant', json.dumps(final_db_content, ensure_ascii=False))
                 return
             logger.info("准备搜索....")
             yield await stream_json("process", "正在分析问题...")
+            await asyncio.sleep(0)
 
             search_instance = Search()
             search_plan_data, search_results = await search_instance.search(req.query, chat_history=processed_history)
@@ -280,12 +282,14 @@ async def search(req: SearchRequest):
             print(f"search_plan_data:{search_plan_data}")
             if not search_plan_data:
                 yield await stream_json("process", "该问题不需要搜索，直接回答...")
+                await asyncio.sleep(0)
                 response_generator = generate(req.query, chat_history=processed_history)
                 if response_generator:
                     for chunk in response_generator:
                         chunk_str = chunk.decode('utf-8', errors='ignore')
                         assistant_response_text += chunk_str
                         yield await stream_json("answer_chunk", chunk_str)
+                        await asyncio.sleep(0)
                 final_db_content = {"text": assistant_response_text, "references": []}
                 db.add_message(session_id, 'assistant', json.dumps(final_db_content, ensure_ascii=False))
                 return
@@ -296,24 +300,28 @@ async def search(req: SearchRequest):
 
             if not (foundational_queries or expansion_queries):
                 yield await stream_json("process", "该问题不需要搜索，直接回答...")
+                await asyncio.sleep(0)
                 response_generator = generate(req.query, chat_history=processed_history)
                 if response_generator:
                     for chunk in response_generator:
                         chunk_str = chunk.decode('utf-8', errors='ignore')
                         assistant_response_text += chunk_str
                         yield await stream_json("answer_chunk", chunk_str)
+                        await asyncio.sleep(0)
                 final_db_content = {"text": assistant_response_text, "references": []}
                 db.add_message(session_id, 'assistant', json.dumps(final_db_content, ensure_ascii=False))
                 return
 
             key_entities = search_plan_data.get('query_analysis', {}).get('key_entities', [])
             yield await stream_json("process", f"搜索关键词: {key_entities}")
+            await asyncio.sleep(0)
 
             crawler = Crawl()
             web_pages = crawler.crawl(search_results)
             crawler.close()
 
             yield await stream_json("process", f"搜索完成. 找到 {sum(len(v) for v in web_pages.values())} 个网页.")
+            await asyncio.sleep(0)
 
             retrieval_vertion = config.get("retrieval_version", "v2") # Read from config
             logger.info(f"检索版本: {retrieval_vertion}")
@@ -335,6 +343,7 @@ async def search(req: SearchRequest):
                         chunk_str = str(chunk) # Handle non-byte chunks
                     assistant_response_text += chunk_str
                     yield await stream_json("answer_chunk", chunk_str)
+                    await asyncio.sleep(0)
             all_pages = []
             if isinstance(context, dict):
                 for results in context.values():
@@ -353,9 +362,10 @@ async def search(req: SearchRequest):
                 for page in all_pages if page.get('title') and page.get('link')
             }
             references = list(unique_refs.values())
-            logger.info(f"参考来源: {references}")
+            logger.info(f"参考来源: {json.dumps(references,ensure_ascii=False,indent=2)}")
             if references:
                 yield await stream_json("reference", references)
+                await asyncio.sleep(0)
 
             final_db_content = {"text": assistant_response_text, "references": references}
             db.add_message(session_id, 'assistant', json.dumps(final_db_content, ensure_ascii=False))
@@ -370,9 +380,11 @@ async def search(req: SearchRequest):
         media_type="application/x-json-stream",
         headers={
             "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
+            "Pragma": "no-cache", 
             "Expires": "0",
-            "X-Accel-Buffering": "no"  # 禁用nginx缓冲
+            "X-Accel-Buffering": "no",  # 禁用nginx缓冲
+            "Connection": "keep-alive",  # 保持连接
+            "Transfer-Encoding": "chunked"  # 明确指定分块传输
         }
     )
 
@@ -461,4 +473,4 @@ async def debug_stream():
 
 
 if __name__ == '__main__':
-    uvicorn.run("AISearchServer:app", host='localhost', port=5000, reload=False) 
+    uvicorn.run("AISearchServer:app", host='localhost', port=5000, reload=False, access_log=False) 

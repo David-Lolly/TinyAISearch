@@ -90,6 +90,7 @@ Docker 部署是最简单快速的方式，无需手动配置环境依赖。
 
 ```bash
 # 在项目根目录下执行
+docker-compose build --no-cache
 docker-compose up -d
 ```
 
@@ -103,7 +104,7 @@ docker-compose ps
 #### 3. 访问应用
 
 等待容器构建完成后，在浏览器中访问：
-- **前端界面**：http://localhost:8080
+- **应用界面**：http://localhost:8080
 
 #### 4. 停止服务
 
