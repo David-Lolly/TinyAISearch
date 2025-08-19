@@ -1,6 +1,8 @@
-# 🔍 TinyAISearch ✨
+# TinyAISearch
 
 [ [中文](README.md) | English ]
+
+<img src="./images/ChatMessage.png"  width="100%" />
 
 ---
 
@@ -8,115 +10,204 @@
 
 The project integrates various retrieval strategies (such as similarity, BM25, and multi-path retrieval), allowing for flexible configuration so you can explore the pros and cons of different approaches. It is also compatible with any large model that supports the OpenAI API (e.g., Qwen, DeepSeek, GLM, Ollama).
 
-The frontend is built with **Vue 3**, featuring a clean, modern interface that supports multi-user and multi-session capabilities. We hope you enjoy using it! 😘
+The frontend is built with **Vue 3**, featuring a clean, modern interface that supports multi-user and multi-session capabilities. We hope you enjoy using it!
 
-## 🖼️ Screenshots
+## Screenshots
 
-| Chat Interface | New Chat | Answer Source-Tracing |
-| :---: | :---: | :---: |
-| <img src="./images/ChatView.png" width="100%" /> | <img src="./images/ChatMessage.png" width="100%" /> | <img src="./images/Reference.png" width="100%" /> |
+### Main Interface
 
-## ✨ Features
+**1. Login Interface**
 
-- **🧠 Smart Search Planning**: Analyzes user queries to dynamically generate a search plan.
-- **🔧 Multiple Retrieval Strategies**: Includes both **V1 (Traditional RAG)** and **V2 (Page-Level Retrieval)** modes, with support for similarity, BM25, and RRF multi-path retrieval and reranking.
-- **🔌 Highly Extensible**: Supports any **LLM** compatible with the OpenAI API.
-- **💻 Modern Frontend**: Built with **Vue 3 + Vite**, featuring an elegant UI with multi-user and multi-session support.
-- **🚀 Out-of-the-Box**: Comes with a detailed deployment guide to get you up and running in minutes.
+<img src="./images/Login.png" width="80%" />
 
-## 📖 Getting Started
+**2. Main Application Interface**
 
-### 1. Prerequisites
+<img src="./images/ChatView.png" width="80%" />
 
-Before you begin, ensure you have the following software installed on your local machine:
+### Core Features Demo
 
-- **Node.js**: `v18.0` or higher.
-- **Python**: `v3.10`.
-- **Conda**: For managing the Python virtual environment.
+**Daily Conversation Feature**
 
-### 2. Download and Install
+<img src="./images/ChatMessage.png" width="80%" />
 
-#### ① Clone the Repository
+**Internet Search Feature**
 
-```sh
+<img src="./images/Search.png" width="80%" />
+
+**Answer Source Tracing**
+
+<img src="./images/Reference.png" width="80%" />
+
+## Features
+
+- **Smart Search Planning**: Analyzes user queries to dynamically generate a search plan.
+- **Multiple Retrieval Strategies**: Includes both **V1 (Traditional RAG)** and **V2 (Page-Level Retrieval)** modes, with support for similarity, BM25, and RRF multi-path retrieval and reranking.
+- **Highly Extensible**: Supports any **LLM** compatible with the OpenAI API.
+- **Modern Frontend**: Built with **Vue 3 + Vite**, featuring an elegant UI with multi-user and multi-session support.
+- **Out-of-the-Box**: Comes with a detailed deployment guide to get you up and running in minutes.
+
+## Deployment Guide
+
+### System Requirements
+
+Depending on your chosen deployment method, please ensure your environment meets the following requirements:
+
+#### Docker Deployment (Recommended)
+- **Docker**: 20.10.0 or higher
+- **Docker Compose**: v2.0 or higher
+
+#### Source Code Deployment
+- **Node.js**: v18.0 or higher
+- **Python**: v3.10
+- **Conda**: For managing Python virtual environments
+
+### Download Project
+
+First, clone the project repository to your local machine:
+
+```bash
 git clone https://github.com/David-Lolly/TinyAISearch.git
 cd TinyAISearch
 ```
 
-#### ② Set Up the Backend
+### Method 1: Docker Deployment (Recommended)
 
-```sh
-# Create and activate the Conda virtual environment
+Docker deployment is the simplest and fastest way, requiring no manual environment configuration.
+
+#### 1. Start Services
+
+```bash
+# Execute in the project root directory
+docker-compose up -d
+```
+
+#### 2. Verify Deployment
+
+```bash
+# Check container running status
+docker-compose ps
+```
+
+#### 3. Access Application
+
+After container build completion, access in your browser:
+- **Frontend Interface**: http://localhost:8080
+
+#### 4. Stop Services
+
+```bash
+# Stop and remove containers
+docker-compose down
+```
+
+### Method 2: Source Code Deployment
+
+Source code deployment is suitable for users who need secondary development or deep customization.
+
+#### 1. Backend Environment Setup
+
+```bash
+# Create and activate Conda virtual environment
 conda create -n TinyAISearch python=3.10
 conda activate TinyAISearch
 
-# Install dependencies (using a mirror is recommended for faster downloads)
+# Install Python dependencies (domestic mirror recommended for faster downloads)
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-# It is recommended to install Faiss via Conda to avoid compatibility issues
-# If you have a GPU, you can install the GPU version: conda install -c pytorch faiss-gpu
-conda install -c pytorch faiss-cpu
 ```
 
-#### ③ Set Up the Frontend
+#### 2. Frontend Environment Setup
 
-```sh
-# Navigate to the frontend directory
+```bash
+# Enter frontend directory
 cd frontend
 
-# Install npm dependencies (using a mirror is recommended for faster downloads), this may take a while, so feel free to take a break
+# Configure npm registry (optional, for faster dependency downloads)
 npm config set registry https://registry.npmmirror.com
+
+# Install frontend dependencies
 npm install
 ```
 
-### 3. Launch the Project
+#### 3. Start Services
 
-You will need to open **two** terminal windows to run the backend and frontend services separately.
+You need to start both frontend and backend services simultaneously. It's recommended to open two terminal windows:
 
-- **Terminal 1: Start the Backend Service** (from the root directory `TinyAISearch/`)
-
-```sh
+**Terminal 1: Start Backend Service**
+```bash
+# In project root directory TinyAISearch/
 conda activate TinyAISearch
 python AISearchServer.py
 ```
-> When you see `Uvicorn running on http://localhost:5000`, the backend has started successfully.
+> Seeing `Uvicorn running on http://localhost:5000` indicates successful backend startup
 
-- **Terminal 2: Start the Frontend Service** (from the `TinyAISearch/frontend/` directory)
-
-```sh
+**Terminal 2: Start Frontend Service**
+```bash
+# In frontend/ directory
 npm run dev
 ```
-> The frontend will typically run on `http://localhost:5173`. Check your terminal for the exact address.
+> Frontend service typically runs on `http://localhost:5173`, please check terminal output for actual address
 
-### 4. Quick Start
+#### 4. Access Application
 
-1.  **Register and Log In**: With both services running, open the frontend URL in your browser. You will need to register a new account on your first visit; you can use any username and password.
+After both frontend and backend start successfully, access the frontend address in your browser to begin using.
 
-    <img src="./images/Login.png"  width="600" />
+### Initial Configuration
 
-2.  **Configure Models**: After logging in, you will be directed to the **Configuration Page** to enter the necessary API Keys and Base URLs. To modify the configuration later, click on your profile information in the sidebar and select "Modify Configuration".
+Regardless of deployment method, initial use requires completing the following configuration steps:
 
-    <img src="./images/ConfigV2.png"  width="600" />
+#### 1. User Registration
 
-    **Configuration Notes**:
-    -   **Retrieval Mode**:
-        -   **V2 (Recommended)**: An innovative page-level retrieval mode, better suited for live web searches.
-        -   **V1**: A traditional RAG mode based on retrieving text chunks.
-    -   **V1 Retrieval Quality**:
-        -   `high`: Similarity search + Rerank.
-        -   `higher`: Multi-path retrieval (Similarity + BM25) + RRF fusion.
-    -   **Model Configuration**:
-        -   Fill in the `API_KEY` and `BASE_URL` for your **LLM**, **Embedding**, and **Rerank** models.
-        -   **The Rerank model is not required for V2 mode**.
-        -   You can get free model services from platforms like [SiliconFlow](https://cloud.siliconflow.cn/account/ak).
-    -   **Auxiliary Search Engine**:
-        -   It is recommended to configure the Google Search API as a backup in case DuckDuckGo is temporarily blocked. Google Programmable Search Engine provides 100 free calls per day.
-    -   **Save Configuration**:
-        -   The **connection test for all required fields must pass** before you can save the configuration and start chatting.
+After accessing the application, you first need to register an account. Username and password can be set arbitrarily, and the system will automatically create a local account.
 
-3.  **Start Chatting**: Once everything is configured, you're ready to start your AI search journey! 🎉
+#### 2. Model Configuration
 
-## 🔧 Technical Implementation
+After successful login, you'll automatically be redirected to the configuration page where you need to fill in the following necessary information:
+
+**Retrieval Mode Selection**:
+- **V2 (Recommended)**: Innovative page-level retrieval mode, better suited for internet search scenarios
+- **V1**: Traditional RAG mode based on text chunk retrieval
+
+**V1 Retrieval Quality** (only needed when V1 mode is selected):
+- `high`: Similarity search + Rerank reordering
+- `higher`: Multi-path retrieval (Similarity + BM25) + RRF fusion
+
+**Model Configuration**:
+- **LLM Model**: Fill in API Key and Base URL
+- **Embedding Model**: Fill in API Key and Base URL
+- **Rerank Model** (not required for V2 mode): Fill in API Key and Base URL
+
+**Recommended Service Providers**:
+- [SiliconFlow](https://cloud.siliconflow.cn/account/ak): Provides free model service quotas
+- Other OpenAI API compatible service providers
+
+**Search Engine Configuration**:
+- **Primary Search**: Uses DuckDuckGo by default (no configuration needed)
+- **Backup Search** (optional): Google Programmable Search API (100 free calls per day)
+
+#### 3. Connection Testing
+
+After configuration, click the "Connection Test" button on the right side of each configuration item. Ensure all required items pass connection testing before saving configuration and starting to use.
+
+#### 4. Start Using
+
+After successful configuration save, you can begin your AI search experience!
+
+### Frequently Asked Questions
+
+**Q: What to do if container startup fails during Docker deployment?**
+A: Please check port usage to ensure ports 8080 and 5000 are not occupied by other programs. Use `docker-compose logs` to view detailed error information.
+
+**Q: What to do if dependency installation fails during source code deployment?**
+A: It's recommended to use domestic mirror sources. If network issues occur, try using VPN or changing mirror sources.
+
+**Q: What to do if connection testing fails after configuration?**
+A: Please check if API Key is correct, if Base URL is accessible, and if network connection is normal.
+B: If Google connection fails, check if API Key and CSE are filled correctly, and verify if proxy is enabled.
+
+## Technical Implementation
+
+### API Documentation:
+Please check the corresponding API documentation in the doc directory to understand the specific functions and parameter passing of each backend module.
 
 <details>
 <summary><strong>V1 Retrieval Mode (Click to Expand)</strong></summary>
@@ -164,7 +255,7 @@ When humans search, they rarely read every single result. We typically find a so
 </details>
 
 
-## 📂 File Structure
+## File Structure
 
 ```text
 TinyAISearch/
@@ -198,11 +289,12 @@ TinyAISearch/
 - Optimize the memory mechanism
 - Add visualization for the model's thinking process (Currently, when using an inference model, the thinking process is not displayed, only the final answer. It is normal for the model to take some time to respond).
 
-## 🤝 Community & Contributions
+## Community & Contributions
 
 We warmly welcome contributions from the community! If you have any suggestions or run into any issues, please feel free to:
 
 -   Submit an **[Issue](https://github.com/David-Lolly/TinyAISearch/issues)**
 -   Create a **[Pull Request](https://github.com/David-Lolly/TinyAISearch/pulls)**
 
----
+
+

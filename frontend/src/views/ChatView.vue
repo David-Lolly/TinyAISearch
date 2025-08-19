@@ -299,35 +299,24 @@ const sendMessage = async () => {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: abortController.value.signal, 
-    });
-
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
     let buffer = '';
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
+    await api.searchStream(
+      payload,
+      async (chunk) => {
+        buffer += chunk;
       let newlineIndex;
-
       while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
         const line = buffer.slice(0, newlineIndex);
         buffer = buffer.slice(newlineIndex + 1);
         if (line.trim()) {
           processStreamChunk(line);
+          await nextTick();
         }
       }
-    }
-  } catch (error) {
+      },
+      () => {},
+      (error) => {
     if (error.name === 'AbortError') {
       console.log('Fetch aborted by user.');
       const lastMsg = messages.value[messages.value.length - 1];
@@ -341,6 +330,9 @@ const sendMessage = async () => {
         lastMsg.content = `发生错误: ${error.message}`;
       }
     }
+      },
+      abortController.value.signal
+    );
   } finally {
     isLoading.value = false;
     abortController.value = null;

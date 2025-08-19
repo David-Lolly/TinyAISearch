@@ -65,14 +65,17 @@ api.login = (userId, password) => {
 };
 
 // 流式搜索 - 使用 fetch API 而不是 axios，因为axios对流式响应支持不够好
-api.searchStream = async (payload, onChunk, onComplete, onError) => {
+api.searchStream = async (payload, onChunk, onComplete, onError, signal) => {
   try {
     const response = await fetch(`${API_BASE_URL}/search`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/x-json-stream',
+        'Cache-Control': 'no-cache',
       },
       body: JSON.stringify(payload),
+      signal,
     });
 
     if (!response.ok) {
@@ -88,14 +91,13 @@ api.searchStream = async (payload, onChunk, onComplete, onError) => {
 
       const chunk = decoder.decode(value, { stream: true });
       if (chunk) {
-        onChunk(chunk);
+        onChunk && onChunk(chunk);
       }
     }
 
-    onComplete();
+    onComplete && onComplete();
   } catch (error) {
-    console.error('Stream search error:', error);
-    onError(error);
+    onError && onError(error);
   }
 };
 

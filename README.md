@@ -1,6 +1,6 @@
 
 
-# 🔍 TinyAISearch ✨
+# TinyAISearch
 [ 简体中文 | [English](README_EN.md) ]
 
 <img src="./images/ChatMessage.png"  width="100%" />
@@ -12,127 +12,212 @@
 
 项目集成了多种召回策略（如相似度、BM25、多路召回等），支持灵活配置，让你能深入探索不同策略的优劣。同时，它兼容所有兼容 OpenAI API 的大模型（Qwen、DeepSeek、GLM、Ollama 等）。
 
-前端基于 **Vue 3** 开发，界面简洁现代，支持多用户、多会话等功能。希望能为你带来愉快的体验！😘
+前端基于 **Vue 3** 开发，界面简洁现代，支持表格，公式，代码支持多用户、多会话等功能。希望能为你带来愉快的体验！
 
-## 🖼️ 运行效果
+## 运行效果
 
-| 聊天主界面 | 创建新会话 | 回答引用溯源 |
-| :---: | :---: | :---: |
-| <img src="./images/ChatView.png" width="100%" /> | <img src="./images/ChatMessage.png" width="100%" /> | <img src="./images/Reference.png" width="100%" /> |
+### 主要功能界面
 
-## ✨ 功能特性
+**1. 登录界面**
 
-- **🧠 智能搜索规划**：分析用户查询，动态生成搜索计划。
-- **🔧 多种召回策略**：内置 **V1（传统 RAG）** 和 **V2（网页级召回）** 两种模式，支持相似度、BM25、RRF 多路召回与重排序。
-- **🔌 高度可扩展**：支持任意兼容 OpenAI API 的 **LLM**。
-- **💻 现代化前端**：基于 **Vue 3 + Vite** 构建，界面美观，支持多用户和多会话管理。
-- **🚀 开箱即用**：提供详尽的部署指南，让你在几分钟内就能启动并运行项目。
+<img src="./images/Login.png" width="80%" />
 
-## 📖 上手指南
+**2. 应用主界面**
 
-### 1. 环境准备
+<img src="./images/ChatView.png" width="80%" />
 
-在开始之前，请根据部署方式确保你的本地环境中安装了对应软件：
-**1、源码部署**：
 
-- **Node.js**: `v18.0` 或更高版本。
-- **Python**: `v3.10`。
-- **Conda**: 用于管理 Python 虚拟环境。
+### 核心功能演示
 
-*2、docker部署**：
-- **Docker**
-- **Docker Compose**
+**日常对话功能**
 
-### 2. 下载与安装
+<img src="./images/ChatMessage.png" width="80%" />
 
-#### 克隆项目仓库
+**页面渲染**
+- 代码块
 
-```sh
+<img src="./images/code.png" width="80%" />
+
+- 数学公式
+
+<img src="./images/formula.png" width="80%" />
+
+**联网搜索功能**
+
+<img src="./images/Search.png" width="80%" />
+
+**回答引用溯源**
+
+<img src="./images/Reference.png" width="80%" />
+
+## 功能特性
+
+- **智能搜索规划**：分析用户查询，动态生成搜索计划。
+- **多种召回策略**：内置 **V1（传统 RAG）** 和 **V2（网页级召回）** 两种模式，支持相似度、BM25、RRF 多路召回与重排序。
+- **高度可扩展**：支持任意兼容 OpenAI API 的 **LLM**。
+- **现代化前端**：基于 **Vue 3 + Vite** 构建，界面美观，支持多用户和多会话管理。
+- **开箱即用**：提供详尽的部署指南，让你在几分钟内就能启动并运行项目。
+
+## 部署指南
+
+### 环境要求
+
+根据您选择的部署方式，请确保您的环境满足以下要求：
+
+#### Docker 部署（推荐）
+- **Docker**: 20.10.0 或更高版本
+- **Docker Compose**: v2.0 或更高版本
+
+#### 源码部署
+- **Node.js**: v18.0 或更高版本
+- **Python**: v3.10
+- **Conda**: 用于管理 Python 虚拟环境
+
+### 下载项目
+
+首先克隆项目仓库到本地：
+
+```bash
 git clone https://github.com/David-Lolly/TinyAISearch.git
 cd TinyAISearch
 ```
-#### Docker部署
-```sh
+
+### 方式一：Docker 部署（推荐）
+
+Docker 部署是最简单快速的方式，无需手动配置环境依赖。
+
+#### 1. 启动服务
+
+```bash
+# 在项目根目录下执行
 docker-compose up -d
-# 等待容器构建后即可，启动成功后访问本机8080端口
 ```
 
-#### 源码部署
+#### 2. 验证部署
 
-#### 1、配置后端
+```bash
+# 查看容器运行状态
+docker-compose ps
+```
 
-```sh
+#### 3. 访问应用
+
+等待容器构建完成后，在浏览器中访问：
+- **前端界面**：http://localhost:8080
+
+#### 4. 停止服务
+
+```bash
+# 停止并删除容器
+docker-compose down
+
+```
+
+### 方式二：源码部署
+
+源码部署适合需要进行二次开发或深度定制的用户。
+
+#### 1. 后端环境配置
+
+```bash
 # 创建并激活 Conda 虚拟环境
 conda create -n TinyAISearch python=3.10
 conda activate TinyAISearch
 
-# 安装依赖 (建议使用国内镜像源加速)
+# 安装 Python 依赖 (建议使用国内镜像源加速)
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-# Faiss 依赖建议使用 Conda 安装，以避免兼容性问题
-# 如果你有 GPU，可以安装 GPU 版本：conda install -c pytorch faiss-gpu
-conda install -c pytorch faiss-cpu
 ```
 
-#### 2、配置前端
+#### 2. 前端环境配置
 
-```sh
+```bash
 # 进入前端目录
 cd frontend
 
-# 安装 npm 依赖 (建议使用国内镜像源加速)，整个过程需要点时间，可以休息等待一会
+# 配置 npm 镜像源（可选，用于加速依赖下载）
 npm config set registry https://registry.npmmirror.com
+
+# 安装前端依赖
 npm install
 ```
 
-### 3. 启动项目
+#### 3. 启动服务
 
-请打开 **两个** 终端窗口，分别执行以下命令：
+需要同时启动前端和后端服务，建议打开两个终端窗口：
 
-- **终端 1：启动后端服务** (在项目根目录 `TinyAISearch/` 下)
-
-```sh
+**终端1：启动后端服务**
+```bash
+# 在项目根目录 TinyAISearch/ 下
 conda activate TinyAISearch
 python AISearchServer.py
 ```
-> 看到 `Uvicorn running on http://localhost:5000` 表示后端启动成功。
+> 看到 `Uvicorn running on http://localhost:5000` 表示后端启动成功
 
-- **终端 2：启动前端服务** (在 `TinyAISearch/frontend/` 目录下)
-
-```sh
+**终端2：启动前端服务**
+```bash
+# 在 frontend/ 目录下
 npm run dev
 ```
-> 前端通常会运行在 `http://localhost:5173`，请留意终端输出的实际地址，成功后即可打开浏览器访问。
+> 前端服务通常运行在 `http://localhost:5173`，请关注终端输出的实际地址
 
-### 4. 快速上手
+#### 4. 访问应用
 
-1.  **注册与登录**：前后端都成功启动后，在浏览器中访问前端地址。首次使用需要注册一个账号，用户名和密码可任意填写。
+前后端都启动成功后，在浏览器中访问前端地址即可开始使用。
 
-    <img src="./images/Login.png"  width="600" />
+### 首次使用配置
 
-2.  **配置模型**：登录后，将进入 **配置页面** 填写必要的 API Key 和 Base URL,后续想要更改配置，可以在侧边栏点击个人信息，在弹出的“修改配置”中进行修改。
+无论采用哪种部署方式，首次使用都需要完成以下配置步骤：
 
-    <img src="./images/ConfigV2.png"  width="600" />
+#### 1. 用户注册
 
-    **配置说明**:
-    -   **检索模式**:
-        -   **V2 (推荐)**: 创新的网页级召回模式，更适合联网搜索场景。
-        -   **V1**: 传统的 RAG 模式，基于文本块（Chunk）进行召回。
-    -   **V1 召回质量**:
-        -   `high`: 相似度检索 + Rerank 重排序。
-        -   `higher`: 多路召回（相似度 + BM25）+ RRF 融合。
-    -   **模型配置**:
-        -   请填写 **LLM**、**Embedding** 及 **Rerank** 模型的 `API_KEY` 和 `BASE_URL`。
-        -   **V2 模式无需 Rerank 模型**。
-        -   你可以从 [硅基流动](https://cloud.siliconflow.cn/account/ak) 等平台获取免费的模型服务。
-    -   **辅助搜索引擎**:
-        -   建议配置 Google Search API，作为 DuckDuckGo 被临时封禁时的备用方案，Google可编程搜索每天有100次免费调用。
-    -   **保存配置**:
-        -   所有必填项右侧的 **连接测试必须全部通过** 后，才能保存配置并开始聊天。
+访问应用后，首先需要注册一个账号。用户名和密码可以任意设置，系统会自动创建本地账户。
 
-3.  **开始聊天**：配置完成后，即可开始你的 AI 搜索之旅！🎉
+#### 2. 模型配置
 
-## 🔧 技术实现
+登录成功后会自动跳转到配置页面，需要填写以下必要信息：
+
+**检索模式选择**：
+- **V2 (推荐)**：创新的网页级召回模式，更适合联网搜索场景
+- **V1**：传统的 RAG 模式，基于文本块（Chunk）进行召回
+
+**V1 召回质量**（仅在选择V1模式时需要配置）：
+- `high`：相似度检索 + Rerank 重排序
+- `higher`：多路召回（相似度 + BM25）+ RRF 融合
+
+**模型配置**：
+- **LLM 模型**：填写 API Key 和 Base URL
+- **Embedding 模型**：填写 API Key 和 Base URL  
+- **Rerank 模型**（V2模式无需配置）：填写 API Key 和 Base URL
+
+**推荐服务提供商**：
+- [硅基流动](https://cloud.siliconflow.cn/account/ak)：提供免费的模型服务额度
+- 其他兼容 OpenAI API 的服务商
+
+**搜索引擎配置**：
+- **主要搜索**：默认使用 DuckDuckGo（无需配置）
+- **备用搜索**（可选）：Google 可编程搜索 API（每天免费100次调用）
+
+#### 3. 连接测试
+
+配置完成后，点击每个配置项右侧的"连接测试"按钮，确保所有必填项的连接测试都通过后，才能保存配置并开始使用。
+
+#### 4. 开始使用
+
+配置保存成功后，即可开始您的 AI 搜索体验！
+
+### 常见问题
+
+**Q: Docker 部署时容器启动失败怎么办？**
+A: 请检查端口占用情况，确保 8080 和 5000 端口未被其他程序占用。可以使用 `docker-compose logs` 查看详细错误信息。
+
+**Q: 源码部署时依赖安装失败怎么办？**
+A: 建议使用国内镜像源，如遇到网络问题可以尝试使用 VPN 或更换镜像源。
+
+**Q: 配置完成后连接测试失败怎么办？**
+A: 请检查 API Key 是否正确，Base URL 是否可访问，网络连接是否正常。
+B: Google 连接失败，API Key和CSE是否填写正确，查看是否开启代理
+
+## 技术实现
 
 ### API文档：
 请在doc目录下查看对应的API文档，了解后端各个版块的具体功能以及参数传递
@@ -183,7 +268,7 @@ V2 模式模拟了人类的搜索行为，以网页为单位进行召回，旨�
 </details>
 
 
-## 📂 文件结构
+## 文件结构
 
 ```text
 TinyAISearch/
@@ -217,7 +302,7 @@ TinyAISearch/
 - 优化记忆机制
 - 增加对推理模型思考过程的展示（目前使用推理模型，思考过程不会显示，只显示回答内容，若使用推理模型太久没有响应属于正常情况）
 
-## 🤝 社区贡献
+## 社区贡献
 
 我们非常欢迎来自社区的贡献！如果你有任何建议或问题，请随时：
 

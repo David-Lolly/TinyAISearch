@@ -110,6 +110,7 @@ async def stream_json(data_type: str, content: any):
         "type": data_type,
         "payload": content
     }
+    print(f'message:{json.dumps(message,indent=2,ensure_ascii=False)}')
     return json.dumps(message, ensure_ascii=False) + '\n'
 
 def get_and_clean_history(session_id: str) -> List[dict]:
@@ -221,12 +222,19 @@ async def test_google_connection(req: TestRequest):
             "cx": req.cse_id,
             "num": 5
         }
+        os.environ['HTTP_PROXY'] = 'http://localhost:7890'
+        os.environ['HTTPS_PROXY'] = 'http://localhost:7890'
+        os.environ['http_proxy'] = 'http://localhost:7890'
+        os.environ['https_proxy'] = 'http://localhost:7890'
         response = requests.get(url, params=params, timeout=5)
         if response.status_code == 200:
+            logger.info(f"Google Search连接成功。")
             return {"success": True, "message": "Google Search连接成功"}
         else:
             return {"success": False, "message": "Google Search连接失败"}
+        
     except Exception as e:
+        print(f"Google Search连接测试失败: {e}")
         logger.error(f"Google Search连接测试失败: {e}")
         return {"success": False, "message": f"连接失败: {str(e)}"}
 
@@ -357,7 +365,16 @@ async def search(req: SearchRequest):
             logger.error(f"搜索处理过程中出错: {e}", exc_info=True)
             yield await stream_json("error", f"发生错误: {e}")
 
-    return StreamingResponse(process_request(), media_type="application/x-json-stream")
+    return StreamingResponse(
+        process_request(), 
+        media_type="application/x-json-stream",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "X-Accel-Buffering": "no"  # 禁用nginx缓冲
+        }
+    )
 
 
 @app.get("/sessions")
@@ -425,6 +442,23 @@ async def register(req: RegisterRequest):
     logger.info(f"用户注册成功: {req.user_id}")
     return {"message": "注册成功", "user_id": req.user_id}
 
+@app.get("/debug/stream")
+async def debug_stream():
+    async def gen():
+        for i in range(5):
+            yield await stream_json("debug", f"tick-{i+1}")
+            await asyncio.sleep(1)
+    return StreamingResponse(
+        gen(),
+        media_type="application/x-json-stream",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
 
 if __name__ == '__main__':
-    uvicorn.run("AISearchServer:app", host='localhost', port=5000, reload=True) 
+    uvicorn.run("AISearchServer:app", host='localhost', port=5000, reload=False) 

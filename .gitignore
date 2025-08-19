@@ -9,3 +9,4 @@ config_docker.db
 ./.idea
 ./pycache
 ./docker_logs
+./cache
