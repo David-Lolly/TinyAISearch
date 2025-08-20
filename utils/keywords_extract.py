@@ -26,15 +26,12 @@ def keywords_extract(query: str,chat_history: List = []) -> Optional[Dict[str, A
         **Search Engine Characteristics:**
 
         * **Baidu**: Excels at handling queries in a Chinese context, especially for lifestyle and current-event content like news, weather, locations, people, and travel.
-        * **DuckDuckGo**: Excels at handling global English queries, providing higher-quality information in professional and complex domains like technology, academia, and programming.
+        * **Google**: Excels at handling global English queries, providing higher-quality information in professional and complex domains like technology, academia, and programming.
 
         **Core Objective:**
         Your output is not just a list of keywords, but a complete strategy. The `identified_intent` and `assessed_complexity` you generate will directly guide the subsequent system in determining how many web pages to retrieve to formulate an answer (e.g., fewer pages for simple questions, more pages for complex ones).
 
-        ## [PERSONA]
-
-        You are an information scientist and intelligence analyst with 20 years of experience. You are meticulous, highly logical, and skilled at deconstructing ambiguous requests into core information needs. You can anticipate which information sources are most likely to contain high-quality answers. You never engage in small talk; you only provide precise, efficient, and structured strategies.
-
+        
         ## [CORE DIRECTIVE]
 
         Based on the user input , current date and the history you talk with user below, strictly follow the `[WORKFLOW]` and return the result in the format defined by `[OUTPUT_SCHEMA]`.
@@ -45,10 +42,11 @@ def keywords_extract(query: str,chat_history: List = []) -> Optional[Dict[str, A
 
 
         ## [WORKFLOW]
+        **Time Information Handling**: When queries contain relative time expressions (e.g., "next week", "明天","下个月"), replace with specific dates calculated from {current_date}.
 
         **1. Phase 1: Deconstruct & Analyze**
 
-        * **1.1. Entity Extraction**: Identify all key entities based on the `[CHAT_HISTORY]` , `[USER_QUERY]` and `[CURRENT_DATE]` (e.g., people, organizations, products, technologies, locations, dates), and the `[CHAT_HISTORY]` is very important,this is the context of you talk with the user,you must pay attention to it.
+        * **1.1. Entity Extraction**: Identify all key entities based on the chat history , user query and current date (e.g., people, organizations, products, technologies, locations, dates), and the chat history is very important,this is the context of you talk with the user ,you must pay attention to it.
 
         * **1.2. Intent Classification & Complexity Assessment**:
 
@@ -74,17 +72,16 @@ def keywords_extract(query: str,chat_history: List = []) -> Optional[Dict[str, A
         * The number and depth of queries are determined by the `assessed_complexity`.
         * **[Simple] Complexity**:
             * **Foundational Queries**: Construct 1-2 direct queries. Prioritize the search engine best suited for the query type.If the user's query contains time information, please replace it with a specific date.
-            * **Expansion & Deep-Dive Queries**: Not required; return an empty list `[]`.
         * **[Moderate] Complexity**:
-            * **Foundational Queries**: Construct 2-3 core queries. May use a combination of search engines, with a preference for DuckDuckGo.If the user's query contains time information, please replace it with a specific date.
-            * **Expansion & Deep-Dive Queries**: Construct 2-3 expansion queries to explore related information. These must be in the same language as the user's query.
+            * **Foundational Queries**: Construct 2-3 core queries. May use a combination of search engines, with a preference for Google.If the user's query contains time information, please replace it with a specific date.
         * **[Complex] Complexity**:
-            * **Foundational Queries**: Construct 2-3 core queries. Must use a combination of Baidu and DuckDuckGo to ensure breadth and quality. (For Chinese queries, keywords must be translated to English for DuckDuckGo).If the user's query contains time information, please replace it with a specific date.
-            * **Expansion & Deep-Dive Queries**: Construct 3-5 deep-dive queries to explore various perspectives (e.g., pros/cons, future trends, alternatives, case studies). These must be in the same language as the user's query.
+            * **Foundational Queries**: Construct 2-3 core queries. Must use a combination of Baidu and Google to ensure breadth and quality. (For Chinese queries, keywords must be translated to English for Google).If the user's query contains time information, please replace it with a specific date.
 
         ## [OUTPUT_SCHEMA]
-
-        **Your final output must be a perfectly formatted JSON object, with no comments or explanations outside the JSON structure.**
+        - Return ONLY a valid JSON object
+        - No explanatory text before or after JSON
+        - Use exact field names as specified
+        - Ensure all required fields are present
 
         {{
         "query_analysis": {{
@@ -99,97 +96,6 @@ def keywords_extract(query: str,chat_history: List = []) -> Optional[Dict[str, A
             {{"query": "[Query A1]", "engine": "[Search Engine A1]"}},
             {{"query": "[Query A2]", "engine": "[Search Engine A2]"}}
             ],
-            "expansion_deep_dive_queries": [
-            "[Query B1]",
-            "[Query B2]",
-            "[Query B3]"
-            ]
-        }}
-        }}
-
-
-        ## Examples
-
-        ### eg1:
-
-        **User Input:** 2025-08-16武汉天气如何？
-
-        **Output:**
-
-        {{
-        "query_analysis": {{
-            "original_query": "2025-08-16武汉天气如何？",
-            "identified_intent": "[Specific_Fact_Lookup]",
-            "assessed_complexity": "[Simple]",
-            "key_entities": ["8月16日武汉天气"],
-            "implicit_questions": []
-        }},
-        "search_plan": {{
-            "foundational_queries": [
-            {{"query": "8月16日武汉天气预报", "engine": "baidu"}}
-            ],
-            "expansion_deep_dive_queries": []
-        }}
-        }}
-
-        ### eg2:
-
-        **User Input:** 请解释一下在微调大语言模型时，LoRA技术是如何工作的，以及它相比于全量微调的主要优势是什么？
-
-        **Output:**
-
-        {{
-        "query_analysis": {{
-            "original_query": "请解释一下在微调大语言模型时，LoRA技术是如何工作的，以及它相比于全量微调的主要优势是什么？",
-            "identified_intent": "[Comparative_Analysis]",
-            "assessed_complexity": "[Complex]",
-            "key_entities": ["LoRA", "大语言模型微调", "全量微调"],
-            "implicit_questions": ["LoRA技术的缺点是什么?", "LoRA适用于哪些场景?", "LoRA和全量微调的训练成本对比"]
-        }},
-        "search_plan": {{
-            "foundational_queries": [
-            {{"query": "LoRA technology working principle for LLM fine-tuning", "engine": "duckduckgo"}},
-            {{"query": "LoRA vs full fine-tuning pros and cons", "engine": "duckduckgo"}},
-            {{"query": "LoRA技术原理与优势", "engine": "baidu"}}
-            ],
-            "expansion_deep_dive_queries": [
-            "大型语言模型的低秩适应详解",
-            "面向大语言模型的 LoRA 实现指南",
-            "LoRA 的缺点与局限性",
-            "LoRA 微调性能基准测试"
-            ]
-        }}
-        }}
-
-        ### eg3:
-
-        **User Input:** How to make tiramisu at home?
-
-        **Output:**
-        {{
-        "query_analysis": {{
-            "original_query": "How to make tiramisu at home?",
-            "identified_intent": "[How-To_Instruction]",
-            "assessed_complexity": "[Moderate]",
-            "key_entities": ["tiramisu", "homemade recipe"],
-            "implicit_questions": ["What ingredients are needed for authentic tiramisu?", "What are common mistakes to avoid when making tiramisu?"]
-        }},
-        "search_plan": {{
-            "foundational_queries": [
-            {{
-                "query": "easy tiramisu recipe for beginners", 
-                "engine": "duckduckgo"
-            }},
-            {{
-                "query": "authentic tiramisu recipe step by step", 
-                "engine": "duckduckgo"
-            }}
-            ],
-            "expansion_deep_dive_queries": [
-            "tiramisu recipe without raw eggs",
-            "best ladyfingers for tiramisu",
-            "common tiramisu mistakes and how to fix them"
-            ]
         }}
         }}
         """

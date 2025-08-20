@@ -3,16 +3,14 @@
 # TinyAISearch
 [ 简体中文 | [English](README_EN.md) ]
 
-<img src="./images/ChatMessage.png"  width="100%" />
-
-
----
 
 **TinyAISearch** 是一个轻量级的 AI 搜索项目，它实现了从 **搜索关键词分析**、**网页爬取**、**内容召回** 到 **流式回答** 的完整 RAG 流程。
 
 项目集成了多种召回策略（如相似度、BM25、多路召回等），支持灵活配置，让你能深入探索不同策略的优劣。同时，它兼容所有兼容 OpenAI API 的大模型（Qwen、DeepSeek、GLM、Ollama 等）。
 
 前端基于 **Vue 3** 开发，界面简洁现代，支持表格，公式，代码支持多用户、多会话等功能。希望能为你带来愉快的体验！
+
+<img src="./images/Search.png" width="100%" />
 
 ## 运行效果
 
@@ -90,7 +88,7 @@ Docker 部署是最简单快速的方式，无需手动配置环境依赖。
 
 ```bash
 # 在项目根目录下执行
-docker-compose build --no-cache
+docker-compose build # 第一次运行该项目需要构建镜像
 docker-compose up -d
 ```
 

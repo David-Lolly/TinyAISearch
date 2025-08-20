@@ -25,7 +25,8 @@ def generate(query, chat_history: Optional[List[dict]] = None):
             yield b"Error: LLM configuration is missing. Please configure the application."
         return error_stream()
     current_date ='当前日期：'+ date.today().strftime("%Y-%m-%d")
-    system_message = {"role": "system", "content": '你是AI搜索助手，名字叫做TinyAISearch，由乐乐开发，{{current_date}}。请根据你和用户的聊天记录，以及当前用户的问题，充分理解用户意图，进行回答。'}
+    prompt = """你是AI搜索助手，名字叫做TinyAISearch，由乐乐开发，{current_date}。请根据你和用户的聊天记录，以及当前用户的问题，充分理解用户意图，进行回答。"""
+    system_message = {"role": "system", "content": prompt.format(current_date=current_date)}
     messages = [system_message]
     if chat_history:
         for msg in chat_history:
